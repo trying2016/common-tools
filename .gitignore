@@ -1,0 +1,14 @@
+# ignore compile dist
+
+
+/output.log
+/server.conf
+/build/
+/app/version.go
+/vendor/
+/go.sum
+/pb/
+
+# editor config dir
+.vscode/
+.idea/
