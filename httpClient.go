@@ -24,6 +24,7 @@ type HttpClient struct {
 	postDataType  int
 	useGZip       bool
 	receiveCookie string
+	queryMap      map[string]interface{}
 }
 
 func NewHttpClient() *HttpClient {
@@ -31,6 +32,28 @@ func NewHttpClient() *HttpClient {
 	hClient.timeOut = time.Second * 30
 	hClient.postDataType = POST_DATA_TYPE_FORM
 	return &hClient
+}
+
+func (hClient *HttpClient) AddQuery(key string, value interface{}) {
+	if hClient.queryMap == nil {
+		hClient.queryMap = make(map[string]interface{})
+	}
+	hClient.queryMap[key] = value
+}
+
+func (hClient *HttpClient) getQuery() string {
+	if hClient.queryMap == nil {
+		return ""
+	}
+	str := ""
+	for k, v := range hClient.queryMap {
+		if str != "" {
+			str = fmt.Sprintf("%v&%v=%v", str, k, v)
+		} else {
+			str = fmt.Sprintf("%v=%v", k, v)
+		}
+	}
+	return str
 }
 
 // Set contents type
@@ -78,13 +101,13 @@ func (hClient *HttpClient) EncodingGZip(bUse bool) {
 // Post
 func (hClient *HttpClient) Post(link string) ([]byte, error) {
 	if hClient.postContents == nil || len(hClient.postContents) == 0 {
-		hClient.postContents = hClient.getPostData()
+		hClient.postContents = hClient.GetPostData()
 	}
 	return hClient.do("POST", link, hClient.postContents)
 }
 
 func (hClient *HttpClient) Get(link string) ([]byte, error) {
-	strForm := string(hClient.getPostData())
+	strForm := string(hClient.GetPostData())
 	if strForm != "" {
 		if !strings.Contains(link, "?") {
 			link = link + "?"
@@ -98,7 +121,7 @@ func (hClient *HttpClient) Get(link string) ([]byte, error) {
 	return hClient.do("GET", link, nil)
 }
 
-func (hClient *HttpClient) getPostData() []byte {
+func (hClient *HttpClient) GetPostData() []byte {
 	if hClient.postData == nil || len(hClient.postData) == 0 {
 		return []byte("")
 	}
@@ -135,6 +158,15 @@ func (hClient *HttpClient) setHeaders(request *http.Request) {
 }
 
 func (hClient *HttpClient) do(method string, link string, data []byte) ([]byte, error) {
+	queryParams := hClient.getQuery()
+	if queryParams != "" {
+		if !strings.Contains(link, "?") {
+			link += "?" + queryParams
+		} else {
+			link += "&" + queryParams
+		}
+	}
+
 	var request *http.Request
 	var err error
 	if data != nil && len(data) != 0 {
