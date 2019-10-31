@@ -25,17 +25,28 @@ func NewMap(data map[string]interface{}) Map {
 }
 
 func (data Map) GetString(key string) string {
-	return ToString(data[key])
+	value, exists := data[key]
+	if exists {
+		return ToString(value)
+	} else {
+		return ""
+	}
 }
 
 func (data Map) GetInt(key string) int {
 	return ToInt(data[key])
 }
 
+func (data Map) GetUInt64(key string) uint64 {
+	return ToUint64(data[key])
+}
+
 func (data Map) GetUInt32(key string) uint32 {
 	return ToUint32(data[key])
 }
-
+func (data Map) GetInt32(key string) int32 {
+	return ToInt32(data[key])
+}
 func (data Map) ToJson() string {
 	jData, err := json.Marshal(data)
 	if err == nil {

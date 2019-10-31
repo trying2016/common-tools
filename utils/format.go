@@ -5,8 +5,28 @@ import (
 	"strconv"
 )
 
-func ToString(value interface{}) string {
-	return fmt.Sprintf("%v", value)
+func ToString(v interface{}) string {
+	switch vv := v.(type) {
+	case uint:
+		return strconv.FormatUint(uint64(vv), 10)
+	case int:
+		return strconv.Itoa(vv)
+	case int32:
+		return strconv.Itoa(int(vv))
+	case uint32:
+		return strconv.FormatUint(uint64(vv), 10)
+	case int64:
+		return strconv.FormatInt(vv, 10)
+	case uint64:
+		return strconv.FormatUint(vv, 10)
+	case float64:
+		return strconv.FormatFloat(vv, 'f', -1, 64)
+	case float32:
+		return strconv.FormatFloat(float64(vv), 'f', -1, 32)
+	case string:
+		return vv
+	}
+	return fmt.Sprintf("%v", v)
 }
 
 func ToInt(v interface{}) int {
@@ -28,6 +48,30 @@ func ToInt(v interface{}) int {
 	case string:
 		if vvv, err := strconv.Atoi(vv); err == nil {
 			return vvv
+		}
+	}
+	return 0
+}
+
+func ToInt32(v interface{}) int32 {
+	switch vv := v.(type) {
+	case uint:
+		return int32(vv)
+	case int:
+		return int32(vv)
+	case int32:
+		return vv
+	case uint32:
+		return int32(vv)
+	case int64:
+		return int32(vv)
+	case uint64:
+		return int32(vv)
+	case float64:
+		return int32(vv + 0.0001)
+	case string:
+		if vvv, err := strconv.ParseUint(vv, 10, 32); err == nil {
+			return int32(vvv)
 		}
 	}
 	return 0

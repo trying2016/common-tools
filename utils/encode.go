@@ -7,22 +7,32 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"math/rand"
-	"time"
 )
 
 var (
-	codes   = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-	codeLen = len(codes)
+	codes      = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+	allCodes   = "abcdefghijklmnopqrstuvwxyz1234567890"
+	codeLen    = len(codes)
+	allCodeLen = len(allCodes)
 )
 
 //生成32位随机序列
 func CreateRandomString(len int) string {
 	data := make([]byte, len)
-	rand.Seed(time.Now().UnixNano())
 
 	for i := 0; i < len; i++ {
 		idx := rand.Intn(codeLen)
 		data[i] = byte(codes[idx])
+	}
+	return string(data)
+}
+
+func CreateRandomAllString(len int) string {
+	data := make([]byte, len)
+
+	for i := 0; i < len; i++ {
+		idx := rand.Int() % allCodeLen
+		data[i] = allCodes[idx]
 	}
 	return string(data)
 }

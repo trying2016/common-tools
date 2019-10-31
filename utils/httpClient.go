@@ -195,8 +195,23 @@ func (hClient *HttpClient) do(method string, link string, data []byte) ([]byte, 
 	if err != nil {
 		return nil, err
 	} else {
+		/*netClient := &http.Client{
+			Timeout: hClient.timeOut,
+		}
+		var transport *http.Transport = nil
+		if true {
+			URL := url.URL{}
+			urlProxy, _ := URL.Parse("http://127.0.0.1:8888")
+			transport = &http.Transport{
+				Proxy: http.ProxyURL(urlProxy),
+			}
+		} else {
+			transport = &http.Transport{}
+		}*/
+
 		netClient := &http.Client{
 			Timeout: hClient.timeOut,
+			//Transport: transport,
 		}
 
 		// set header

@@ -6,7 +6,6 @@ import (
 	"encoding/hex"
 	"math/rand"
 	"strings"
-	"time"
 )
 
 const (
@@ -15,7 +14,6 @@ const (
 
 func generateSalt(len int) []byte {
 	data := make([]byte, len)
-	rand.Seed(time.Now().UnixNano())
 	for i := 0; i < len; i++ {
 		idx := rand.Intn(codeLen)
 		data[i] = byte(codes[idx])

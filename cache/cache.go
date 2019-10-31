@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/gomodule/redigo/redis"
-	utils "github.com/trying2016/common-tools"
 	"github.com/trying2016/common-tools/log"
+	"github.com/trying2016/common-tools/utils"
 )
 
 type RedisConfig struct {
@@ -34,9 +34,11 @@ func NewCache(cfg *RedisConfig) *Cache {
 	cache.Init()
 	return cache
 }
+
 func Strings(reply interface{}, err error) ([]string, error) {
 	return redis.Strings(reply, err)
 }
+
 func (cache *Cache) Init() {
 	cache.RedisClient = &redis.Pool{
 		MaxIdle:     20,
@@ -111,7 +113,7 @@ func (cache *Cache) Get(key string) (ret string, err error) {
 	return
 }
 
-func (cache *Cache) Set(key string, value string) (ret string, err error) {
+func (cache *Cache) Set(key string, value string) (err error) {
 	_, err = cache.do("SET", cache.Name+key, value)
 	if err != nil {
 		log.Error("set error: %s (%s, %s, %s)", err.Error(), cache.Name, key, value)
@@ -119,6 +121,39 @@ func (cache *Cache) Set(key string, value string) (ret string, err error) {
 	return
 }
 
+func (cache *Cache) LLen(key string) int {
+	ret, err := redis.Int(cache.do("LLEN", cache.Name+key))
+	if err != nil {
+		log.Error("LLen error: %s (%s, %s)", err.Error(), cache.Name, key)
+	}
+	return ret
+}
+
+//
+func (cache *Cache) LRange(key string, start int, stop int) (rets []string, err error) {
+	rets, err = Strings(cache.do("LRANGE", cache.Name+key, start, stop))
+	if err != nil {
+		log.Error("LRange error: %s (%s, %s)", err.Error(), cache.Name, key)
+	}
+	return
+}
+
+func (cache *Cache) RPush(key, value string) (err error) {
+	_, err = cache.do("RPUSH", cache.Name+key, value)
+	if err != nil {
+		log.Error("RPush error: %s (%s, %s)", err.Error(), cache.Name, key)
+	}
+	return
+}
+
+// 删除key
+func (cache *Cache) Del(key string) (err error) {
+	_, err = cache.do("del", cache.Name+key)
+	if err != nil {
+		log.Error("set error: %s (%s, %s)", err.Error(), cache.Name, key)
+	}
+	return
+}
 func (cache *Cache) Incrby(key string, value int) (ret int, err error) {
 	ret, err = redis.Int(cache.do("INCRBY", cache.Name+key, value))
 	if err != nil {
