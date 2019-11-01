@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"math/rand"
+	"strings"
 	"time"
 )
 
@@ -77,4 +78,22 @@ func MaxInt(a, b int) int {
 	} else {
 		return b
 	}
+}
+
+// 截取字符串
+func SubleString(src, str1, str2 string) string{
+	src = string([]rune(src))
+	str1 = string([]rune(str1))
+	str2 = string([]rune(str2))
+
+	nBegine := strings.Index(src, str1)
+	if nBegine == -1 || nBegine == len(src)-1{
+		return ""
+	}
+	tmp := src[nBegine+1:]
+	nEnd := strings.Index(tmp, str2)
+	if nEnd == -1 {
+		return ""
+	}
+	return tmp[:nEnd]
 }
