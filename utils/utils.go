@@ -90,7 +90,7 @@ func SubleString(src, str1, str2 string) string{
 	if nBegine == -1 || nBegine == len(src)-1{
 		return ""
 	}
-	tmp := src[nBegine+1:]
+	tmp := src[nBegine+len(str1):]
 	nEnd := strings.Index(tmp, str2)
 	if nEnd == -1 {
 		return ""
