@@ -21,6 +21,20 @@ var logFileSliceSize int64
 
 // Log instance
 var stdOut, stdErr *log.Logger
+var LoggerOutput *LogWriter
+// log writer
+type LogWriter struct {
+	out *os.File
+}
+func (l *LogWriter) Write(p []byte) (n int, err error){
+	if fileLoggerQueue != nil {
+		fileLoggerQueue <- string(p)
+	}
+	if l.out != nil {
+		return l.out.Write(p)
+	}
+	return len(p), err
+}
 
 // Init logger
 func Init(level, out string, size int64) error {
@@ -35,6 +49,9 @@ func Init(level, out string, size int64) error {
 		gLogInfoEnabled = true
 	}
 
+	// logger writer
+	LoggerOutput = &LogWriter{}
+
 	outputs := strings.Split(strings.Trim(out, " "), ",")
 	if len(outputs) > 0 {
 		for i := 0; i < len(outputs); i++ {
@@ -42,6 +59,7 @@ func Init(level, out string, size int64) error {
 			if o == "Console" && stdOut == nil {
 				stdOut = log.New(os.Stdout, "", log.LstdFlags)
 				stdErr = log.New(os.Stderr, "", log.LstdFlags)
+				LoggerOutput.out = os.Stdout
 			} else if len(o) > 0 && len(logFilePath) == 0 {
 				logFilePath, _ = filepath.Abs(o)
 			} else if len(o) > 0 {
