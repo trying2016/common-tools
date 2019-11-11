@@ -97,3 +97,16 @@ func SubleString(src, str1, str2 string) string{
 	}
 	return tmp[:nEnd]
 }
+
+/*
+ * 删除Slice中的元素。
+ * params:
+ *   s: slice对象指针，类型为*[]interface{}
+ *   index: 要删除元素的索引
+ * return:
+ *   无
+ * 说明：直接操作传入的Slice对象，传入的序列地址不变，但内容已经被修改
+ */
+func SliceRemove(s *[]interface{}, index int) {
+	*s = append((*s)[:index], (*s)[index+1:]...)
+}
