@@ -172,7 +172,7 @@ func (cache *Cache) Expire(key string, time int) (err error) {
 
 // 获取所有key
 func (cache* Cache) Keys(key string) []string{
-	arr, err := redis.Strings(cache.do("keys", key))
+	arr, err := redis.Strings(cache.do("keys", cache.Name+key))
 	if err != nil {
 		return nil
 	}
