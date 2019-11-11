@@ -95,7 +95,7 @@ func (cache *Cache) HMGet(key string, args ...interface{}) (rets []string, err e
 }
 
 func (cache *Cache) HGetAll(key string) (map[string]string, error) {
-	arr, err := redis.Strings(cache.do("hgetall", cache.Name+key))
+	arr, err := redis.Strings(cache.do("hgetall", key))
 	if err != nil {
 		log.Error("keys error: %s (%s, %s)", err.Error(), cache.Name, key)
 		return nil, err
