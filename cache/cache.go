@@ -1,10 +1,10 @@
 package cache
 
 import (
-	"fmt"
+	"errors"
 	"time"
 
-	"github.com/gomodule/redigo/redis"
+	"github.com/go-redis/redis/v7"
 	"github.com/trying2016/common-tools/log"
 	"github.com/trying2016/common-tools/utils"
 )
@@ -16,165 +16,224 @@ type RedisConfig struct {
 	Port     int
 }
 
+var errClientNull = errors.New("Redis client is null")
+
 func init() {
 
 }
 
 type Cache struct {
 	Name        string
-	RedisClient *redis.Pool
-	cfg         *RedisConfig
+	redisClient *redis.Client
 }
 
-func NewCache(cfg *RedisConfig) *Cache {
-	utils.NewHttpClient()
-	cache := &Cache{}
-	cache.cfg = cfg
-	cache.Name = cfg.Name
-	cache.Init()
+func NewCache(client *redis.Client, name string) *Cache {
+	cache := &Cache{
+		redisClient: client,
+		Name:        name,
+	}
 	return cache
 }
 
-func Strings(reply interface{}, err error) ([]string, error) {
-	return redis.Strings(reply, err)
-}
-
-func (cache *Cache) Init() {
-	cache.RedisClient = &redis.Pool{
-		MaxIdle:     20,
-		Wait:        true,
-		MaxActive:   cache.cfg.PoolSize, // max pool size
-		IdleTimeout: 30 * time.Second,   //timeout
-		Dial: func() (redis.Conn, error) {
-			dns := fmt.Sprintf("%s:%d", cache.cfg.Host, cache.cfg.Port)
-			c, err := redis.Dial("tcp", dns)
-			if err != nil {
-				return nil, err
-			}
-			return c, nil
-		}, TestOnBorrow: func(c redis.Conn, t time.Time) error {
-			if time.Since(t) < time.Minute {
-				return nil
-			}
-			_, err := c.Do("PING")
-			return err
-		},
+func Strings(reply []interface{}, err error) ([]string, error) {
+	var arr []string
+	for _, v := range reply {
+		arr = append(arr, utils.ToString(v))
 	}
+	return arr, nil
 }
 
 func (cache *Cache) Close() {
-	if cache.RedisClient != nil {
-		cache.RedisClient.Close()
-		cache.RedisClient = nil
+	if cache.redisClient != nil {
+		_ = cache.redisClient.Close()
+		cache.redisClient = nil
 	}
 }
 
-func (cache *Cache) do(commandName string, args ...interface{}) (reply interface{}, err error) {
-	rd := cache.RedisClient.Get()
-	defer rd.Close()
-	reply, err = rd.Do(commandName, args...)
-	return
+func (cache *Cache) GetClient() (*redis.Client, error) {
+	if cache.redisClient == nil {
+		return nil, errClientNull
+	} else {
+		return cache.redisClient, nil
+	}
 }
 
 func (cache *Cache) HSet(key string, field string, value string) (err error) {
-	_, err = cache.do("HSET", cache.Name+key, field, value)
+	client, err := cache.GetClient()
 	if err != nil {
-		log.Error("hset error: %s (%s, %s, %s, %s)", err.Error(), cache.Name, key, field, value)
+		log.Error("GetClient error: %v ", err)
+		return err
+	}
+	err = client.HSet(cache.Name+key, field, value).Err()
+	if err != nil {
+		log.Error("hset error: %v (%s, %s, %s, %s)", err, cache.Name, key, field, value)
 	}
 	return
 }
 
 func (cache *Cache) HGet(key string, field string) (ret string, err error) {
-	ret, err = redis.String(cache.do("HGET", cache.Name+key, field))
+	client, err := cache.GetClient()
+	if err != nil {
+		log.Error("GetClient error: %v ", err)
+		return "", err
+	}
+	cmd := client.HGet(cache.Name+key, field)
+	ret, err = cmd.Result()
+	if err != nil {
+		log.Error("HGet error: %v (%s, %s, %s)", err, cache.Name, key, field)
+	}
 	return
 }
 
 func (cache *Cache) HMGet(key string, args ...interface{}) (rets []string, err error) {
-	rets, err = redis.Strings(cache.do("HMGET", cache.Name+key, args))
-	return
+	client, err := cache.GetClient()
+	if err != nil {
+		log.Error("GetClient error: %v ", err)
+		return nil, err
+	}
+	cmd := client.HMGet(cache.Name + key)
+	err = cmd.Err()
+	if err != nil {
+		log.Error("HMGet error: %v (%s, %s)", err, cache.Name, key)
+	}
+	return Strings(cmd.Result())
 }
 
 func (cache *Cache) HGetAll(key string) (map[string]string, error) {
-	arr, err := redis.Strings(cache.do("hgetall", key))
+	client, err := cache.GetClient()
 	if err != nil {
-		log.Error("keys error: %s (%s, %s)", err.Error(), cache.Name, key)
+		log.Error("GetClient error: %v ", err)
 		return nil, err
-	} else {
-		rets := make(map[string]string)
-		for i := 0; i < len(arr); i += 2 {
-			rets[arr[i]] = arr[i+1]
-		}
-		return rets, nil
 	}
+	cmd := client.HGetAll(key)
+	rets, err := cmd.Result()
+	if err != nil {
+		log.Error("HGetAll error: %v (%s, %s)", err, cache.Name, key)
+		return nil, err
+	}
+	return rets, err
 }
 
 func (cache *Cache) Get(key string) (ret string, err error) {
-	ret, err = redis.String(cache.do("GET", cache.Name+key))
+	client, err := cache.GetClient()
+	if err != nil {
+		log.Error("GetClient error: %v ", err)
+		return "", err
+	}
+	cmd := client.Get(cache.Name + key)
+	ret, err = cmd.Result()
+	if err != nil {
+		log.Error("Get error: %v (%s, %s)", err, cache.Name, key)
+	}
 	return
 }
 
-func (cache *Cache) Set(key string, value string) (err error) {
-	_, err = cache.do("SET", cache.Name+key, value)
+func (cache *Cache) Set(key string, value string, expiration time.Duration) (err error) {
+	client, err := cache.GetClient()
 	if err != nil {
-		log.Error("set error: %s (%s, %s, %s)", err.Error(), cache.Name, key, value)
+		log.Error("GetClient error: %v ", err)
+		return err
+	}
+	cmd := client.Set(cache.Name+key, value, expiration)
+	err = cmd.Err()
+	if err != nil {
+		log.Error("set error: %v (%s, %s, %s)", err, cache.Name, key, value)
 	}
 	return
 }
 
 func (cache *Cache) LLen(key string) int {
-	ret, err := redis.Int(cache.do("LLEN", cache.Name+key))
+	client, err := cache.GetClient()
 	if err != nil {
-		log.Error("LLen error: %s (%s, %s)", err.Error(), cache.Name, key)
+		log.Error("GetClient error: %v ", err)
+		return 0
 	}
-	return ret
+	cmd := client.LLen(cache.Name + key)
+	ret, err := cmd.Result()
+	if err != nil {
+		log.Error("LLen error: %v (%s, %s)", err, cache.Name, key)
+	}
+	return int(ret)
 }
 
 //
 func (cache *Cache) LRange(key string, start int, stop int) (rets []string, err error) {
-	rets, err = Strings(cache.do("LRANGE", cache.Name+key, start, stop))
+	client, err := cache.GetClient()
 	if err != nil {
-		log.Error("LRange error: %s (%s, %s)", err.Error(), cache.Name, key)
+		log.Error("GetClient error: %v ", err)
+		return nil, err
 	}
-	return
+	cmd := client.LRange(cache.Name+key, int64(start), int64(stop))
+	if cmd.Err() != nil {
+		log.Error("LRange error: %v (%s, %s)", cmd.Err(), cache.Name, key)
+	}
+	return cmd.Result()
 }
 
 func (cache *Cache) RPush(key, value string) (err error) {
-	_, err = cache.do("RPUSH", cache.Name+key, value)
+	client, err := cache.GetClient()
 	if err != nil {
-		log.Error("RPush error: %s (%s, %s)", err.Error(), cache.Name, key)
+		log.Error("GetClient error: %v ", err)
+		return err
+	}
+	cmd := client.RPush(cache.Name+key, value)
+	err = cmd.Err()
+	if err != nil {
+		log.Error("RPush error: %v (%s, %s)", err, cache.Name, key)
 	}
 	return
 }
 
 // 删除key
 func (cache *Cache) Del(key string) (err error) {
-	_, err = cache.do("del", cache.Name+key)
+	client, err := cache.GetClient()
 	if err != nil {
-		log.Error("set error: %s (%s, %s)", err.Error(), cache.Name, key)
+		log.Error("GetClient error: %v ", err)
+		return err
+	}
+	err = client.Del(cache.Name + key).Err()
+	if err != nil {
+		log.Error("set error: %v (%s, %s)", err, cache.Name, key)
 	}
 	return
 }
-func (cache *Cache) Incrby(key string, value int) (ret int, err error) {
-	ret, err = redis.Int(cache.do("INCRBY", cache.Name+key, value))
+func (cache *Cache) Incrby(key string, value int64) (ret int64, err error) {
+	client, err := cache.GetClient()
 	if err != nil {
-		log.Error("INCRBY error: %s (%s, %s, %d)", err.Error(), cache.Name, key, value)
+		log.Error("GetClient error: %v ", err)
+		return 0, err
+	}
+	cmd := client.IncrBy(cache.Name+key, value)
+	ret, err = cmd.Result()
+	if err != nil {
+		log.Error("INCRBY error: %v (%s, %s, %v)", err, cache.Name, key, value)
 	}
 	return
 }
 
-func (cache *Cache) Expire(key string, time int) (err error) {
-	_, err = cache.do("EXPIRE", cache.Name+key, time)
+func (cache *Cache) Expire(key string, expireTime time.Duration) (err error) {
+	client, err := cache.GetClient()
 	if err != nil {
-		log.Error("Expire error: %s (%s, %s, %d)", err.Error(), cache.Name, key, time)
+		log.Error("GetClient error: %v ", err)
+		return err
+	}
+	err = client.Expire(cache.Name+key, expireTime).Err()
+	if err != nil {
+		log.Error("Expire error: %v (%s, %s, %d)", err, cache.Name, key, expireTime)
 	}
 	return
 }
 
 // 获取所有key
-func (cache* Cache) Keys(key string) []string{
-	arr, err := redis.Strings(cache.do("keys", cache.Name+key))
+func (cache *Cache) Keys(key string) ([]string, error) {
+	client, err := cache.GetClient()
 	if err != nil {
-		return nil
+		log.Error("GetClient error: %v ", err)
+		return nil, err
 	}
-	return arr
+	cmd := client.Keys(cache.Name + key)
+	if cmd.Err() != nil {
+		log.Error("Keys error: %v (%s, %s)", cmd.Err(), cache.Name, key)
+	}
+	return cmd.Result()
 }
