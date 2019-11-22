@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/go-redis/redis/v7"
+	"github.com/go-redis/redis"
 	"github.com/trying2016/common-tools/log"
 	"github.com/trying2016/common-tools/utils"
 )
