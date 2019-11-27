@@ -128,7 +128,7 @@ func (cache *Cache) Get(key string) (ret string, err error) {
 	return
 }
 
-func (cache *Cache) Set(key string, value string, expiration time.Duration) (err error) {
+func (cache *Cache) Set(key string, value interface{}, expiration time.Duration) (err error) {
 	client, err := cache.GetClient()
 	if err != nil {
 		log.Error("GetClient error: %v ", err)
