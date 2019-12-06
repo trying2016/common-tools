@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 )
@@ -25,6 +26,7 @@ type HttpClient struct {
 	useGZip       bool
 	receiveCookie string
 	queryMap      map[string]interface{}
+	proxy         string
 }
 
 func NewHttpClient() *HttpClient {
@@ -96,6 +98,16 @@ func (hClient *HttpClient) AddHeader(key, value string) {
 //
 func (hClient *HttpClient) EncodingGZip(bUse bool) {
 	hClient.useGZip = bUse
+}
+
+// Set the proxy host:port or http://host:port
+// example 127.0.0.1:8888
+func (hClient *HttpClient) SetProxy(proxy string) {
+	if strings.Contains(proxy, "://") {
+		hClient.proxy = proxy
+	} else {
+		hClient.proxy = "http://" + proxy
+	}
 }
 
 // Post
@@ -212,6 +224,12 @@ func (hClient *HttpClient) do(method string, link string, data []byte) ([]byte, 
 		netClient := &http.Client{
 			Timeout: hClient.timeOut,
 			//Transport: transport,
+		}
+		if hClient.proxy != "" {
+			URL := url.URL{}
+			urlProxy, _ := URL.Parse(hClient.proxy)
+			transport := netClient.Transport.(*http.Transport)
+			transport.Proxy = http.ProxyURL(urlProxy)
 		}
 
 		// set header
