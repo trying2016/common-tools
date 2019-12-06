@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"net/url"
 	"strings"
@@ -228,10 +229,20 @@ func (hClient *HttpClient) do(method string, link string, data []byte) ([]byte, 
 		if hClient.proxy != "" {
 			URL := url.URL{}
 			urlProxy, _ := URL.Parse(hClient.proxy)
-			transport := netClient.Transport.(*http.Transport)
-			transport.Proxy = http.ProxyURL(urlProxy)
+			netTransport := &http.Transport{
+				Proxy: http.ProxyURL(urlProxy),
+				Dial: func(netw, addr string) (net.Conn, error) {
+					c, err := net.DialTimeout(netw, addr, time.Second*time.Duration(10))
+					if err != nil {
+						return nil, err
+					}
+					return c, nil
+				},
+				MaxIdleConnsPerHost:   10,                             //每个host最大空闲连接
+				ResponseHeaderTimeout: time.Second * time.Duration(5), //数据收发5秒超时
+			}
+			netClient.Transport = netTransport
 		}
-
 		// set header
 		hClient.setHeaders(request)
 
