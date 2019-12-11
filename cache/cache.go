@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/go-redis/redis"
-	"github.com/trying2016/common-tools/log"
 	"github.com/trying2016/common-tools/utils"
 )
 
@@ -61,12 +60,12 @@ func (cache *Cache) GetClient() (*redis.Client, error) {
 func (cache *Cache) HSet(key string, field string, value string) (err error) {
 	client, err := cache.GetClient()
 	if err != nil {
-		log.Error("GetClient error: %v ", err)
+		//log.Error("GetClient error: %v ", err)
 		return err
 	}
 	err = client.HSet(cache.Name+key, field, value).Err()
 	if err != nil {
-		log.Error("hset error: %v (%s, %s, %s, %s)", err, cache.Name, key, field, value)
+		//log.Error("hset error: %v (%s, %s, %s, %s)", err, cache.Name, key, field, value)
 	}
 	return
 }
@@ -74,13 +73,13 @@ func (cache *Cache) HSet(key string, field string, value string) (err error) {
 func (cache *Cache) HGet(key string, field string) (ret string, err error) {
 	client, err := cache.GetClient()
 	if err != nil {
-		log.Error("GetClient error: %v ", err)
+		//log.Error("GetClient error: %v ", err)
 		return "", err
 	}
 	cmd := client.HGet(cache.Name+key, field)
 	ret, err = cmd.Result()
 	if err != nil {
-		log.Error("HGet error: %v (%s, %s, %s)", err, cache.Name, key, field)
+		//log.Error("HGet error: %v (%s, %s, %s)", err, cache.Name, key, field)
 	}
 	return
 }
@@ -88,13 +87,13 @@ func (cache *Cache) HGet(key string, field string) (ret string, err error) {
 func (cache *Cache) HMGet(key string, args ...interface{}) (rets []string, err error) {
 	client, err := cache.GetClient()
 	if err != nil {
-		log.Error("GetClient error: %v ", err)
+		//log.Error("GetClient error: %v ", err)
 		return nil, err
 	}
 	cmd := client.HMGet(cache.Name + key)
 	err = cmd.Err()
 	if err != nil {
-		log.Error("HMGet error: %v (%s, %s)", err, cache.Name, key)
+		//log.Error("HMGet error: %v (%s, %s)", err, cache.Name, key)
 	}
 	return Strings(cmd.Result())
 }
@@ -102,13 +101,13 @@ func (cache *Cache) HMGet(key string, args ...interface{}) (rets []string, err e
 func (cache *Cache) HGetAll(key string) (map[string]string, error) {
 	client, err := cache.GetClient()
 	if err != nil {
-		log.Error("GetClient error: %v ", err)
+		//log.Error("GetClient error: %v ", err)
 		return nil, err
 	}
 	cmd := client.HGetAll(key)
 	rets, err := cmd.Result()
 	if err != nil {
-		log.Error("HGetAll error: %v (%s, %s)", err, cache.Name, key)
+		//log.Error("HGetAll error: %v (%s, %s)", err, cache.Name, key)
 		return nil, err
 	}
 	return rets, err
@@ -117,13 +116,13 @@ func (cache *Cache) HGetAll(key string) (map[string]string, error) {
 func (cache *Cache) Get(key string) (ret string, err error) {
 	client, err := cache.GetClient()
 	if err != nil {
-		log.Error("GetClient error: %v ", err)
+		//log.Error("GetClient error: %v ", err)
 		return "", err
 	}
 	cmd := client.Get(cache.Name + key)
 	ret, err = cmd.Result()
 	if err != nil {
-		log.Error("Get error: %v (%s, %s)", err, cache.Name, key)
+		//log.Error("Get error: %v (%s, %s)", err, cache.Name, key)
 	}
 	return
 }
@@ -131,13 +130,13 @@ func (cache *Cache) Get(key string) (ret string, err error) {
 func (cache *Cache) Set(key string, value interface{}, expiration time.Duration) (err error) {
 	client, err := cache.GetClient()
 	if err != nil {
-		log.Error("GetClient error: %v ", err)
+		//log.Error("GetClient error: %v ", err)
 		return err
 	}
 	cmd := client.Set(cache.Name+key, value, expiration)
 	err = cmd.Err()
 	if err != nil {
-		log.Error("set error: %v (%s, %s, %s)", err, cache.Name, key, value)
+		//log.Error("set error: %v (%s, %s, %s)", err, cache.Name, key, value)
 	}
 	return
 }
@@ -145,13 +144,13 @@ func (cache *Cache) Set(key string, value interface{}, expiration time.Duration)
 func (cache *Cache) LLen(key string) int {
 	client, err := cache.GetClient()
 	if err != nil {
-		log.Error("GetClient error: %v ", err)
+		//log.Error("GetClient error: %v ", err)
 		return 0
 	}
 	cmd := client.LLen(cache.Name + key)
 	ret, err := cmd.Result()
 	if err != nil {
-		log.Error("LLen error: %v (%s, %s)", err, cache.Name, key)
+		//log.Error("LLen error: %v (%s, %s)", err, cache.Name, key)
 	}
 	return int(ret)
 }
@@ -160,12 +159,12 @@ func (cache *Cache) LLen(key string) int {
 func (cache *Cache) LRange(key string, start int, stop int) (rets []string, err error) {
 	client, err := cache.GetClient()
 	if err != nil {
-		log.Error("GetClient error: %v ", err)
+		//log.Error("GetClient error: %v ", err)
 		return nil, err
 	}
 	cmd := client.LRange(cache.Name+key, int64(start), int64(stop))
 	if cmd.Err() != nil {
-		log.Error("LRange error: %v (%s, %s)", cmd.Err(), cache.Name, key)
+		//log.Error("LRange error: %v (%s, %s)", cmd.Err(), cache.Name, key)
 	}
 	return cmd.Result()
 }
@@ -173,13 +172,13 @@ func (cache *Cache) LRange(key string, start int, stop int) (rets []string, err 
 func (cache *Cache) RPush(key, value string) (err error) {
 	client, err := cache.GetClient()
 	if err != nil {
-		log.Error("GetClient error: %v ", err)
+		//log.Error("GetClient error: %v ", err)
 		return err
 	}
 	cmd := client.RPush(cache.Name+key, value)
 	err = cmd.Err()
 	if err != nil {
-		log.Error("RPush error: %v (%s, %s)", err, cache.Name, key)
+		//log.Error("RPush error: %v (%s, %s)", err, cache.Name, key)
 	}
 	return
 }
@@ -188,25 +187,25 @@ func (cache *Cache) RPush(key, value string) (err error) {
 func (cache *Cache) Del(key string) (err error) {
 	client, err := cache.GetClient()
 	if err != nil {
-		log.Error("GetClient error: %v ", err)
+		//log.Error("GetClient error: %v ", err)
 		return err
 	}
 	err = client.Del(cache.Name + key).Err()
 	if err != nil {
-		log.Error("set error: %v (%s, %s)", err, cache.Name, key)
+		//log.Error("set error: %v (%s, %s)", err, cache.Name, key)
 	}
 	return
 }
 func (cache *Cache) Incrby(key string, value int64) (ret int64, err error) {
 	client, err := cache.GetClient()
 	if err != nil {
-		log.Error("GetClient error: %v ", err)
+		//log.Error("GetClient error: %v ", err)
 		return 0, err
 	}
 	cmd := client.IncrBy(cache.Name+key, value)
 	ret, err = cmd.Result()
 	if err != nil {
-		log.Error("INCRBY error: %v (%s, %s, %v)", err, cache.Name, key, value)
+		//log.Error("INCRBY error: %v (%s, %s, %v)", err, cache.Name, key, value)
 	}
 	return
 }
@@ -214,12 +213,12 @@ func (cache *Cache) Incrby(key string, value int64) (ret int64, err error) {
 func (cache *Cache) Expire(key string, expireTime time.Duration) (err error) {
 	client, err := cache.GetClient()
 	if err != nil {
-		log.Error("GetClient error: %v ", err)
+		//log.Error("GetClient error: %v ", err)
 		return err
 	}
 	err = client.Expire(cache.Name+key, expireTime).Err()
 	if err != nil {
-		log.Error("Expire error: %v (%s, %s, %d)", err, cache.Name, key, expireTime)
+		//log.Error("Expire error: %v (%s, %s, %d)", err, cache.Name, key, expireTime)
 	}
 	return
 }
@@ -228,12 +227,12 @@ func (cache *Cache) Expire(key string, expireTime time.Duration) (err error) {
 func (cache *Cache) Keys(key string) ([]string, error) {
 	client, err := cache.GetClient()
 	if err != nil {
-		log.Error("GetClient error: %v ", err)
+		//log.Error("GetClient error: %v ", err)
 		return nil, err
 	}
 	cmd := client.Keys(cache.Name + key)
 	if cmd.Err() != nil {
-		log.Error("Keys error: %v (%s, %s)", cmd.Err(), cache.Name, key)
+		//log.Error("Keys error: %v (%s, %s)", cmd.Err(), cache.Name, key)
 	}
 	return cmd.Result()
 }
