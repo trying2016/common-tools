@@ -68,6 +68,10 @@ func (hClient *HttpClient) SetPostData(postData interface{}) {
 	switch vv := postData.(type) {
 	case string:
 		hClient.postContents = []byte(vv)
+		break
+	case []byte:
+		hClient.postContents = vv
+		break
 	default:
 		hClient.postContents, _ = json.Marshal(postData)
 	}
