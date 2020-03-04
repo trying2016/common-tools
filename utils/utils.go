@@ -81,13 +81,13 @@ func MaxInt(a, b int) int {
 }
 
 // 截取字符串
-func SubleString(src, str1, str2 string) string{
+func SubleString(src, str1, str2 string) string {
 	src = string([]rune(src))
 	str1 = string([]rune(str1))
 	str2 = string([]rune(str2))
 
 	nBegine := strings.Index(src, str1)
-	if nBegine == -1 || nBegine == len(src)-1{
+	if nBegine == -1 || nBegine == len(src)-1 {
 		return ""
 	}
 	tmp := src[nBegine+len(str1):]
@@ -109,4 +109,14 @@ func SubleString(src, str1, str2 string) string{
  */
 func SliceRemove(s *[]interface{}, index int) {
 	*s = append((*s)[:index], (*s)[index+1:]...)
+}
+
+// 安全的go run
+func SafeGo(callBack func()) {
+	go func() {
+		defer func() {
+
+		}()
+		callBack()
+	}()
 }

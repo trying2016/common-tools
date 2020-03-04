@@ -37,6 +37,13 @@ func NewHttpClient() *HttpClient {
 	return &hClient
 }
 
+func NewHttpClientByTime(timeout time.Duration) *HttpClient {
+	hClient := HttpClient{}
+	hClient.timeOut = time.Second * timeout
+	hClient.postDataType = POST_DATA_TYPE_FORM
+	return &hClient
+}
+
 func (hClient *HttpClient) AddQuery(key string, value interface{}) {
 	if hClient.queryMap == nil {
 		hClient.queryMap = make(map[string]interface{})
