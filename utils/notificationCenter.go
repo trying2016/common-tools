@@ -5,6 +5,17 @@ import (
 	"sync"
 )
 
+var singleNotificationCenter *NotificationCenter
+
+func init() {
+	singleNotificationCenter = &NotificationCenter{}
+	singleNotificationCenter.mapObservers = make(map[string]*Observer)
+}
+
+func GetNotificationCenter() *NotificationCenter {
+	return singleNotificationCenter
+}
+
 type observerCallback func(data interface{})
 
 type Observer struct {
