@@ -3,7 +3,6 @@ package utils
 import (
 	"bytes"
 	"compress/gzip"
-	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -239,23 +238,13 @@ func (hClient *HttpClient) do(method string, link string, data []byte) ([]byte, 
 		}*/
 
 		var transport *http.Transport = nil
-		if hClient.Host != "" {
-			transport = &http.Transport{
-				DialContext: func(ctx context.Context, network, addr string) (conn net.Conn, err error) {
-					return net.Dial(network, hClient.Host)
-				},
-			}
-		}
-
 		netClient := &http.Client{
-			Timeout:   hClient.timeOut,
-			Transport: transport,
+			Timeout: hClient.timeOut,
 		}
-
 		if hClient.proxy != "" {
 			URL := url.URL{}
 			urlProxy, _ := URL.Parse(hClient.proxy)
-			netTransport := &http.Transport{
+			transport = &http.Transport{
 				Proxy: http.ProxyURL(urlProxy),
 				Dial: func(netw, addr string) (net.Conn, error) {
 					c, err := net.DialTimeout(netw, addr, time.Second*time.Duration(10))
@@ -267,7 +256,9 @@ func (hClient *HttpClient) do(method string, link string, data []byte) ([]byte, 
 				MaxIdleConnsPerHost:   10,                             //每个host最大空闲连接
 				ResponseHeaderTimeout: time.Second * time.Duration(5), //数据收发5秒超时
 			}
-			netClient.Transport = netTransport
+		}
+		if transport != nil {
+			netClient.Transport = transport
 		}
 		// set header
 		hClient.setHeaders(request)
