@@ -3,6 +3,7 @@ package utils
 import (
 	"bytes"
 	"compress/gzip"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -28,6 +29,7 @@ type HttpClient struct {
 	receiveCookie string
 	queryMap      map[string]interface{}
 	proxy         string
+	Host          string
 }
 
 func NewHttpClient() *HttpClient {
@@ -155,6 +157,7 @@ func (hClient *HttpClient) GetPostData() []byte {
 
 		// clean postdata
 		hClient.postData = nil
+		hClient.AddHeader("Content-Type", "application/json; charset=utf-8")
 		return data
 	} else {
 		var data string
@@ -167,6 +170,8 @@ func (hClient *HttpClient) GetPostData() []byte {
 		}
 		// clean postdata
 		hClient.postData = nil
+
+		hClient.AddHeader("Content-Type", "application/x-www-form-urlencoded")
 		return []byte(data)
 	}
 }
@@ -233,10 +238,20 @@ func (hClient *HttpClient) do(method string, link string, data []byte) ([]byte, 
 			transport = &http.Transport{}
 		}*/
 
-		netClient := &http.Client{
-			Timeout: hClient.timeOut,
-			//Transport: transport,
+		var transport *http.Transport = nil
+		if hClient.Host != "" {
+			transport = &http.Transport{
+				DialContext: func(ctx context.Context, network, addr string) (conn net.Conn, err error) {
+					return net.Dial(network, hClient.Host)
+				},
+			}
 		}
+
+		netClient := &http.Client{
+			Timeout:   hClient.timeOut,
+			Transport: transport,
+		}
+
 		if hClient.proxy != "" {
 			URL := url.URL{}
 			urlProxy, _ := URL.Parse(hClient.proxy)
