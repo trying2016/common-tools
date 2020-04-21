@@ -29,6 +29,7 @@ type HttpClient struct {
 	queryMap      map[string]interface{}
 	proxy         string
 	Host          string
+	response      *http.Response
 }
 
 func NewHttpClient() *HttpClient {
@@ -274,7 +275,7 @@ func (hClient *HttpClient) do(method string, link string, data []byte) ([]byte, 
 				}
 				hClient.receiveCookie += fmt.Sprintf("%s%s=%s", separate, v.Name, v.Value)
 			}
-
+			hClient.response = response
 			data, err := ioutil.ReadAll(response.Body)
 			response.Body.Close()
 
@@ -300,4 +301,8 @@ func (hClient *HttpClient) do(method string, link string, data []byte) ([]byte, 
 			}
 		}
 	}
+}
+
+func (hClient *HttpClient) GetResponse() *http.Response {
+	return hClient.response
 }
