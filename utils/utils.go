@@ -107,15 +107,24 @@ func SubleString(src, str1, str2 string) string {
  *   无
  * 说明：直接操作传入的Slice对象，传入的序列地址不变，但内容已经被修改
  */
-func SliceRemove(s *[]interface{}, index int) {
-	*s = append((*s)[:index], (*s)[index+1:]...)
+/*
+func SliceRemove(s interface{}, index int) {
+	var arr *[]interface{} = (*[]interface{})(unsafe.Pointer(&s))
+	(*arr) = append((*arr)[:index], (*arr)[index+1:]...)
+	//*s = append((*s)[:index], (*s)[index+1:]...)
 }
+*/
 
 // 安全的go run
-func SafeGo(callBack func()) {
+func SafeGo(callBack func(), panicFn func(err interface{})) {
 	go func() {
 		defer func() {
-
+			if err := recover(); err != nil {
+				fmt.Printf("panic : %v", err)
+				if panicFn != nil {
+					panicFn(err)
+				}
+			}
 		}()
 		callBack()
 	}()
