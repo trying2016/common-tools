@@ -1,10 +1,12 @@
 package utils
 
 import (
+	"bytes"
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
 	"math/rand"
+	"runtime"
 	"strings"
 	"time"
 )
@@ -114,15 +116,45 @@ func SliceRemove(s interface{}, index int) {
 	//*s = append((*s)[:index], (*s)[index+1:]...)
 }
 */
+// PanicTrace trace panic stack info.
+func PanicTrace(kb int) []byte {
+	s := []byte("/src/runtime/panic.go")
+	e := []byte("\ngoroutine ")
+	line := []byte("\n")
+	stack := make([]byte, kb<<10) //4KB
+	length := runtime.Stack(stack, true)
+	start := bytes.Index(stack, s)
+	stack = stack[start:length]
+	start = bytes.Index(stack, line) + 1
+	stack = stack[start:]
+	end := bytes.LastIndex(stack, line)
+	if end != -1 {
+		stack = stack[:end]
+	}
+	end = bytes.Index(stack, e)
+	if end != -1 {
+		stack = stack[:end]
+	}
+	stack = bytes.TrimRight(stack, "\n")
+	return stack
+}
 
 // 安全的go run
 func SafeGo(callBack func(), panicFn func(err interface{})) {
 	go func() {
 		defer func() {
 			if err := recover(); err != nil {
-				fmt.Printf("panic : %v", err)
-				if panicFn != nil {
-					panicFn(err)
+				data := PanicTrace(4)
+				if data != nil {
+					fmt.Printf("panic : %v", string(data))
+					if panicFn != nil {
+						panicFn(string(data))
+					}
+				} else {
+					fmt.Printf("panic : %v", err)
+					if panicFn != nil {
+						panicFn(err)
+					}
 				}
 			}
 		}()
