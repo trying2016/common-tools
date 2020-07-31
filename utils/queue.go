@@ -50,6 +50,7 @@ func (q *Queue) run() {
 		select {
 		case data := <-q.queue:
 			atomic.AddInt64(q.count, -1)
+
 			q.callBack(data)
 		case <-q.exitSignal:
 			q.jobWaiter.Done()
