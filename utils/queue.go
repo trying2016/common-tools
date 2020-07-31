@@ -36,7 +36,6 @@ func (q *Queue) Push(value interface{}) {
 	atomic.AddInt64(q.count, 1)
 	q.queue <- value
 }
-
 func (q *Queue) Count() int64 {
 	return *q.count
 }
