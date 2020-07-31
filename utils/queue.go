@@ -30,6 +30,10 @@ func (q *Queue) Push(value interface{}) {
 	q.queue <- value
 }
 
+func (q *Queue) Count() int {
+	return len(q.queue)
+}
+
 func (q *Queue) Destroy() {
 	q.exitSignal <- struct{}{}
 	q.jobWaiter.Wait()
