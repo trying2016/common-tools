@@ -172,3 +172,27 @@ func ToInt64(v interface{}) int64 {
 	}
 	return 0
 }
+
+func ToFloat(v interface{}) float64 {
+	switch vv := v.(type) {
+	case uint64:
+		return float64(vv)
+	case int64:
+		return float64(vv)
+	case int:
+		return float64(vv)
+	case uint:
+		return float64(vv)
+	case int32:
+		return float64(vv)
+	case uint32:
+		return float64(vv)
+	case float64:
+		return vv
+	case string:
+		if vvv, err := strconv.ParseFloat(vv, 64); err == nil {
+			return vvv
+		}
+	}
+	return 0
+}
