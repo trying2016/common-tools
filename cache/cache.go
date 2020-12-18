@@ -182,6 +182,23 @@ func (cache *Cache) RPush(key, value string) (err error) {
 	}
 	return
 }
+func (cache *Cache) LPop(key string) (str string, err error) {
+	client, err := cache.GetClient()
+	if err != nil {
+		return "", err
+	}
+	cmd := client.LPop(cache.Name + key)
+	return cmd.Result()
+}
+
+func (cache *Cache) RPop(key string) (str string, err error) {
+	client, err := cache.GetClient()
+	if err != nil {
+		return "", err
+	}
+	cmd := client.RPop(cache.Name + key)
+	return cmd.Result()
+}
 
 // 删除key
 func (cache *Cache) Del(key string) (err error) {
