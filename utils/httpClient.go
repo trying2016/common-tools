@@ -94,6 +94,14 @@ func (hClient *HttpClient) AddFormData(key string, value interface{}) {
 	hClient.postData[key] = value
 }
 
+// add
+func (hClient *HttpClient) AddFormDataEncode(key string, value string) {
+	if hClient.postData == nil {
+		hClient.postData = make(map[string]interface{})
+	}
+	hClient.postData[key] = url.QueryEscape(value)
+}
+
 func (hClient *HttpClient) SetCookie(cookie string) {
 	hClient.AddHeader("Cookie", cookie)
 }
@@ -265,6 +273,7 @@ func (hClient *HttpClient) do(method string, link string, data []byte) ([]byte, 
 		hClient.setHeaders(request)
 
 		if response, err := netClient.Do(request); err != nil {
+			hClient.response = response
 			return nil, err
 		} else {
 			// save recevie cookie
