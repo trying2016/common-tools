@@ -249,6 +249,9 @@ func (hClient *HttpClient) do(method string, link string, data []byte) ([]byte, 
 		var transport *http.Transport = nil
 		netClient := &http.Client{
 			Timeout: hClient.timeOut,
+			CheckRedirect: func(req *http.Request, via []*http.Request) error {
+				return http.ErrUseLastResponse /* 不进入重定向 */
+			},
 		}
 		if hClient.proxy != "" {
 			URL := url.URL{}
