@@ -75,7 +75,29 @@ func (handler *RpcHandler) Handle(ctx context.Context, conn *jsonrpc2.Conn, req 
 	if req.Notif {
 		return // notification
 	}
+	var params = Params{}
+
+	if req.Params != nil {
+		jsonRet := gjson.ParseBytes(*req.Params)
+		for k, v := range jsonRet.Map() {
+			params[strings.ToLower(k)] = v
+		}
+	}
+
+	// 登录
 	if req.Method == "login" {
+		// 拦截登录
+		_, err := handler.methodHandle(req.Method, params)
+		if err != nil && err == ErrorNotHandle {
+			if err := conn.Reply(ctx, req.ID, map[string]interface{}{
+				"status": "error",
+				"error":  err.Error(),
+			}); err != nil {
+				log.Warn("send keep lived Reply fail, error:%v", err)
+			}
+			return
+		}
+
 		handler.conn = conn
 		handler.key = fmt.Sprintf("%v-%v-%v", handler.ip, time.Now().UnixNano(), utils.CreateRandomAllString(16))
 		// 添加到队列
@@ -89,14 +111,6 @@ func (handler *RpcHandler) Handle(ctx context.Context, conn *jsonrpc2.Conn, req 
 		}
 	} else if req.Method == "close" {
 		GetRpcHandlerManager().Remove(handler.key)
-	}
-	var params = Params{}
-
-	if req.Params != nil {
-		jsonRet := gjson.ParseBytes(*req.Params)
-		for k, v := range jsonRet.Map() {
-			params[strings.ToLower(k)] = v
-		}
 	}
 
 	result, err := handler.methodHandle(req.Method, params)
