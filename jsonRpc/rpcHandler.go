@@ -80,7 +80,7 @@ func (handler *RpcHandler) Handle(ctx context.Context, conn *jsonrpc2.Conn, req 
 	if req.Params != nil {
 		jsonRet := gjson.ParseBytes(*req.Params)
 		for k, v := range jsonRet.Map() {
-			params[strings.ToLower(k)] = v
+			params[strings.ToLower(k)] = v.String()
 		}
 	}
 
