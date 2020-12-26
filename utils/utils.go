@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"math/rand"
+	"reflect"
 	"runtime"
 	"strings"
 	"time"
@@ -109,13 +110,18 @@ func SubleString(src, str1, str2 string) string {
  *   无
  * 说明：直接操作传入的Slice对象，传入的序列地址不变，但内容已经被修改
  */
-/*
+
 func SliceRemove(s interface{}, index int) {
-	var arr *[]interface{} = (*[]interface{})(unsafe.Pointer(&s))
-	(*arr) = append((*arr)[:index], (*arr)[index+1:]...)
+	arr := reflect.ValueOf(s)
+	if arr.Kind() != reflect.Array {
+		return
+	}
+	arr.Len()
+	//var arr *[]interface{} = (*[]interface{})(unsafe.Pointer(&s))
+	//(*arr) = append((*arr)[:index], (*arr)[index+1:]...)
 	//*s = append((*s)[:index], (*s)[index+1:]...)
 }
-*/
+
 // PanicTrace trace panic stack info.
 func PanicTrace(kb int) []byte {
 	s := []byte("/src/runtime/panic.go")
