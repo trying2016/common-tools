@@ -39,6 +39,9 @@ func (c *Client) readMessages() {
 		var m anyMessage
 		err = c.stream.ReadObject(&m)
 		if err != nil {
+			if fn, ok := c.mapMethod["close"]; ok {
+				fn(gjson.Result{}, c)
+			}
 			break
 		}
 		switch {
