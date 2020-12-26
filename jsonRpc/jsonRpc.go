@@ -7,9 +7,7 @@ import (
 	"regexp"
 	"strings"
 
-	"51shcp.com/trying/sync/definition/entity"
-
-	"51shcp.com/trying/sync/server/jsonRpc/jsonrpc2"
+	"github.com/trying2016/common-tools/jsonRpc/jsonrpc2"
 )
 
 var (
@@ -17,10 +15,10 @@ var (
 )
 
 type Server struct {
-	mapMethods map[string]func(param entity.Params) (result entity.Params, err error)
+	mapMethods map[string]func(param Params) (result Params, err error)
 }
 
-func (server Server) handle(path string, param entity.Params) (result entity.Params, err error) {
+func (server Server) handle(path string, param Params) (result Params, err error) {
 	if fn, ok := server.mapMethods[path]; ok {
 		return fn(param)
 	} else {
@@ -28,9 +26,9 @@ func (server Server) handle(path string, param entity.Params) (result entity.Par
 	}
 }
 
-func (server *Server) Method(path string, fn func(param entity.Params) (result entity.Params, err error)) {
+func (server *Server) Method(path string, fn func(param Params) (result Params, err error)) {
 	if server.mapMethods == nil {
-		server.mapMethods = make(map[string]func(param entity.Params) (result entity.Params, err error))
+		server.mapMethods = make(map[string]func(param Params) (result Params, err error))
 	}
 	server.mapMethods[path] = fn
 }
@@ -69,6 +67,6 @@ func (server *Server) Start(host string) error {
 	return nil
 }
 
-func (server *Server) BroadCast(method string, param entity.Params) {
+func (server *Server) BroadCast(method string, param Params) {
 	GetRpcHandlerManager().Broadcast(method, param)
 }

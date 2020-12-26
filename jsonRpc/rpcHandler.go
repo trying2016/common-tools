@@ -7,13 +7,11 @@ import (
 	"sync"
 	"time"
 
-	"51shcp.com/trying/sync/definition/entity"
+	"github.com/trying2016/common-tools/jsonRpc/jsonrpc2"
 
 	"github.com/tidwall/gjson"
-
-	"github.com/trying2016/common-tools/utils"
 	"github.com/trying2016/common-tools/log"
-	"51shcp.com/trying/sync/server/jsonRpc/jsonrpc2"
+	"github.com/trying2016/common-tools/utils"
 )
 
 var rpcHandlerManagerInstance *RpcHandlerManager
@@ -47,7 +45,7 @@ func (s *RpcHandlerManager) Remove(key string) {
 	}
 }
 
-func (s *RpcHandlerManager) Broadcast(method string, params entity.Params) {
+func (s *RpcHandlerManager) Broadcast(method string, params Params) {
 	s.handlersLock.Lock()
 	defer s.handlersLock.Unlock()
 	for _, handler := range s.handlers {
@@ -64,10 +62,10 @@ type RpcHandler struct {
 	miner        string
 	minerName    string
 	ip           string
-	methodHandle func(path string, param entity.Params) (result entity.Params, err error)
+	methodHandle func(path string, param Params) (result Params, err error)
 }
 
-func (handler *RpcHandler) Send(method string, params entity.Params) {
+func (handler *RpcHandler) Send(method string, params Params) {
 	if err := handler.conn.Notify(context.Background(), method, params); err != nil {
 		log.Warn("Notify fail, error:%v", err)
 	}
@@ -92,7 +90,7 @@ func (handler *RpcHandler) Handle(ctx context.Context, conn *jsonrpc2.Conn, req 
 	} else if req.Method == "close" {
 		GetRpcHandlerManager().Remove(handler.key)
 	}
-	var params = entity.Params{}
+	var params = Params{}
 
 	if req.Params != nil {
 		jsonRet := gjson.ParseBytes(*req.Params)

@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"51shcp.com/trying/sync/server/jsonRpc/jsonrpc2"
+	"github.com/trying2016/common-tools/jsonRpc/jsonrpc2"
 )
 
 func TestRpcClient(t *testing.T) {
