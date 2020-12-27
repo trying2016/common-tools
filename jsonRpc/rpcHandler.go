@@ -98,6 +98,7 @@ func (handler *RpcHandler) Handle(ctx context.Context, conn *jsonrpc2.Conn, req 
 
 	// 登录
 	if req.Method == "login" {
+		handler.params = make(Params)
 		// 拦截登录
 		_, err := handler.methodHandle(req.Method, params)
 		if err != nil && err != ErrorNotHandle {
