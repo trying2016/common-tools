@@ -63,6 +63,7 @@ type RpcHandler struct {
 	minerName    string
 	ip           string
 	methodHandle func(path string, param Params) (result Params, err error)
+	params       Params
 }
 
 func (handler *RpcHandler) Send(method string, params Params) {
@@ -71,11 +72,22 @@ func (handler *RpcHandler) Send(method string, params Params) {
 	}
 }
 
+func (handler *RpcHandler) Set(key string, value interface{}) {
+	handler.params[key] = value
+}
+
+func (handler *RpcHandler) Get(key string) (interface{}, bool) {
+	value, ok := handler.params[key]
+	return value, ok
+}
+
 func (handler *RpcHandler) Handle(ctx context.Context, conn *jsonrpc2.Conn, req *jsonrpc2.Request) {
 	if req.Notif {
 		return // notification
 	}
-	var params = Params{}
+	var params = Params{
+		"_client": handler,
+	}
 
 	if req.Params != nil {
 		jsonRet := gjson.ParseBytes(*req.Params)
@@ -95,6 +107,7 @@ func (handler *RpcHandler) Handle(ctx context.Context, conn *jsonrpc2.Conn, req 
 			}); err != nil {
 				log.Warn("send keep lived Reply fail, error:%v", err)
 			}
+			conn.Close()
 			return
 		}
 

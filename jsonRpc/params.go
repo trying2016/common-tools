@@ -58,3 +58,12 @@ func (params Params) GetBody() []byte {
 		return nil
 	}
 }
+
+func (params Params) GetRpcHandler() *RpcHandler {
+	c, ok := params["_client"]
+	if ok {
+		return c.(*RpcHandler)
+	} else {
+		return nil
+	}
+}
