@@ -4,6 +4,8 @@ import (
 	"bufio"
 	"encoding/json"
 	"io"
+
+	"github.com/trying2016/common-tools/utils"
 )
 
 // VarintObjectCodec reads/writes JSON-RPC 2.0 objects with a varint
@@ -16,6 +18,7 @@ func (VarintObjectCodec) WriteObject(stream io.Writer, obj interface{}) error {
 	if err != nil {
 		return err
 	}
+	data = utils.Compress(data)
 	data = append(data, '\n')
 	if _, err := stream.Write(data); err != nil {
 		return err
@@ -30,6 +33,7 @@ func (VarintObjectCodec) ReadObject(stream *bufio.Reader, v interface{}) error {
 	if err != nil {
 		return err
 	}
+	body = utils.UnCompress(body)
 	//fmt.Printf("read:%v", string(body))
 	return json.Unmarshal(body, v)
 	//return json.NewDecoder(io.LimitReader(stream, int64(b))).Decode(v)
