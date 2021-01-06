@@ -37,11 +37,20 @@ func (CompressObjectCodec) ReadObject(stream *bufio.Reader, v interface{}) error
 	if err != nil {
 		return err
 	}
+
 	data := make([]byte, int64(b))
-	_, err = stream.Read(data)
-	if err != nil {
-		return err
+	var offset int64
+	for {
+		n, err := stream.Read(data[offset:])
+		if err != nil {
+			return err
+		}
+		offset += int64(n)
+		if offset >= int64(len(data)) {
+			break
+		}
 	}
+
 	data = utils.UnCompress(data)
 	return json.Unmarshal(data, v)
 }
