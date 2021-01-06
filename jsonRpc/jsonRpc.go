@@ -33,7 +33,7 @@ func (server *Server) Method(path string, fn func(param Params) (result Params, 
 	server.mapMethods[path] = fn
 }
 
-func (server *Server) Start(host string) error {
+func (server *Server) Start(host string, codec jsonrpc2.ObjectCodec) error {
 	ctx := context.Background()
 	lis, err := net.Listen("tcp", host) // any available address
 	if err != nil {
@@ -51,7 +51,7 @@ func (server *Server) Start(host string) error {
 			if len(realIps) > 0 {
 				readIp = realIps[0]
 			}
-			jsonrpc2.NewConn(ctx, jsonrpc2.NewBufferedStream(conn, VarintObjectCodec{}), &RpcHandler{
+			jsonrpc2.NewConn(ctx, jsonrpc2.NewBufferedStream(conn, codec), &RpcHandler{
 				ip:           readIp,
 				methodHandle: server.handle,
 			}, opts...)
