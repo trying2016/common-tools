@@ -1,7 +1,6 @@
 package jsonrpc2
 
 import (
-	"fmt"
 	"net"
 
 	"github.com/tidwall/gjson"
@@ -46,14 +45,12 @@ func (c *Client) readMessages() {
 		}
 		switch {
 		case m.request != nil:
-			fmt.Printf("%v %v\n", m.request.Method, string(*m.request.Params))
 			ret := gjson.Parse(string(*m.request.Params))
 			if fn, ok := c.mapMethod[m.request.Method]; ok {
 				fn(ret, c)
 			}
 			continue
 		case m.response != nil:
-			fmt.Printf("%v\n", string(*m.response.Result))
 			ret := gjson.Parse(string(*m.response.Result))
 			method := ret.Get("method").String()
 			if fn, ok := c.mapMethod[method]; ok {

@@ -2,6 +2,7 @@ package jsonRpc
 
 import (
 	"bufio"
+	"encoding/binary"
 	"encoding/json"
 	"io"
 
@@ -19,8 +20,14 @@ func (VarintObjectCodec) WriteObject(stream io.Writer, obj interface{}) error {
 		return err
 	}
 	data = utils.Compress(data)
-	data = append(data, '\n')
-	if _, err := stream.Write(data); err != nil {
+	sendData := make([]byte, len(data)+4)
+	var nLen uint32 = uint32(len(data))
+	var buf4 [4]byte
+	binary.LittleEndian.PutUint32(buf4[:], nLen)
+	copy(sendData, buf4[:])
+	copy(sendData[4:], data)
+	//data = append(data, '\n')
+	if _, err := stream.Write(sendData); err != nil {
 		return err
 	}
 	return nil
@@ -28,8 +35,17 @@ func (VarintObjectCodec) WriteObject(stream io.Writer, obj interface{}) error {
 
 // ReadObject implements ObjectCodec.
 func (VarintObjectCodec) ReadObject(stream *bufio.Reader, v interface{}) error {
-	body, err := bufio.NewReader(stream).ReadBytes('\n')
+	var buf4 [4]byte
+	reader := bufio.NewReader(stream)
+	_, err := reader.Read(buf4[:])
+	if err != nil {
+		return err
+	}
+	nLen := binary.LittleEndian.Uint32(buf4[:])
+	body := make([]byte, nLen)
+	//body, err := bufio.NewReader(stream).ReadBytes('\n')
 	//body, _, err := stream.ReadLine()
+	_, err = reader.Read(body)
 	if err != nil {
 		return err
 	}
