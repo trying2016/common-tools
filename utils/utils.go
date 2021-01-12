@@ -83,6 +83,21 @@ func MaxInt(a, b int) int {
 	}
 }
 
+func MaxInt64(a, b int64) int64 {
+	if a > b {
+		return a
+	} else {
+		return b
+	}
+}
+func MinInt64(a, b int64) int64 {
+	if a > b {
+		return b
+	} else {
+		return a
+	}
+}
+
 // 截取字符串
 func SubleString(src, str1, str2 string) string {
 	src = string([]rune(src))
