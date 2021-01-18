@@ -2,6 +2,8 @@ package utils
 
 import (
 	"os"
+	"os/exec"
+	"runtime"
 
 	"github.com/shirou/gopsutil/process"
 )
@@ -30,4 +32,22 @@ func GetSystemInformation() *SystemInfomation {
 		return &SystemInfomation{Mem: mem, CPU: 0}
 	}
 	return &SystemInfomation{Mem: mem, CPU: cpu}
+}
+
+// 打开网址
+func OpenUrl(url string) error {
+	var cmd string
+	var args []string
+
+	switch runtime.GOOS {
+	case "windows":
+		cmd = "cmd"
+		args = []string{"/c", "start"}
+	case "darwin":
+		cmd = "open"
+	default: // "linux", "freebsd", "openbsd", "netbsd"
+		cmd = "xdg-open"
+	}
+	args = append(args, url)
+	return exec.Command(cmd, args...).Start()
 }
