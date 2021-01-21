@@ -6,7 +6,9 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
+	"encoding/hex"
 	"encoding/pem"
+	"errors"
 	"math/big"
 	"time"
 )
@@ -83,4 +85,43 @@ func VerifySign(publicKey, strData, sig string) bool {
 		return true
 	}
 	return false
+}
+
+// Rsa加密
+func RsaEncrypt(publicKey, strData string) (string, error) {
+	block, _ := pem.Decode(Base64Decoding(publicKey))
+	if block == nil {
+		return "", errors.New("pem decode fail")
+	}
+	pubInterface, err := x509.ParsePKIXPublicKey(block.Bytes)
+	if err != nil {
+		return "", err
+	}
+	pub := pubInterface.(*rsa.PublicKey)
+
+	ret, err := rsa.EncryptPKCS1v15(rand.Reader, pub, []byte(strData))
+	if err != nil {
+		return "", err
+	} else {
+		return hex.EncodeToString(ret), nil
+	}
+}
+
+// Rsa加密
+func RsaDecrypt(privateKey, strData string) (string, error) {
+	block, _ := pem.Decode(Base64Decoding(privateKey))
+	priv, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	if err != nil {
+		return "", err
+	}
+	data, err := hex.DecodeString(strData)
+	if err != nil {
+		return "", err
+	}
+	ret, err := rsa.DecryptPKCS1v15(rand.Reader, priv, data)
+	if err != nil {
+		return "", err
+	} else {
+		return hex.EncodeToString(ret), nil
+	}
 }
