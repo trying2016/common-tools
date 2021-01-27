@@ -44,3 +44,21 @@ func TestGenerateSig(t *testing.T) {
 		t.Error("VerifySign Error")
 	}
 }
+
+func TestRsaEncrypt(t *testing.T) {
+	privateKey, publicKey, err := GenerateKey(256)
+	if err != nil {
+		t.Fatalf("GenerateKey fail, error: %v", err)
+	}
+	fmt.Printf("Private Key :%s \n", privateKey)
+	fmt.Printf("Public Key :%s \n", publicKey)
+	enRet, err := RsaEncrypt(publicKey, "123123")
+	if err != nil {
+		t.Fatalf("RsaEncrypt fail, error: %v", err)
+	}
+	deRet, err := RsaDecrypt(privateKey, enRet)
+	if err != nil {
+		t.Fatalf("RsaDecrypt fail, error: %v", err)
+	}
+	fmt.Printf("result %v", deRet)
+}
