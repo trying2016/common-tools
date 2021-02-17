@@ -53,6 +53,12 @@ func (s *RpcHandlerManager) Broadcast(method string, params Params) {
 	}
 }
 
+func (s *RpcHandlerManager) GetNum() int {
+	s.handlersLock.RLock()
+	defer s.handlersLock.RUnlock()
+	return len(s.handlers)
+}
+
 //
 type RpcHandler struct {
 	conn         *jsonrpc2.Conn
