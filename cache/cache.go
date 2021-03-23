@@ -182,6 +182,21 @@ func (cache *Cache) RPush(key, value string) (err error) {
 	}
 	return
 }
+
+func (cache *Cache) LPush(key, value string) (err error) {
+	client, err := cache.GetClient()
+	if err != nil {
+		//log.Error("GetClient error: %v ", err)
+		return err
+	}
+	cmd := client.LPush(cache.Name+key, value)
+	err = cmd.Err()
+	if err != nil {
+		//log.Error("RPush error: %v (%s, %s)", err, cache.Name, key)
+	}
+	return
+}
+
 func (cache *Cache) LPop(key string) (str string, err error) {
 	client, err := cache.GetClient()
 	if err != nil {
