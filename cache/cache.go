@@ -104,7 +104,7 @@ func (cache *Cache) HGetAll(key string) (map[string]string, error) {
 		//log.Error("GetClient error: %v ", err)
 		return nil, err
 	}
-	cmd := client.HGetAll(key)
+	cmd := client.HGetAll(cache.Name + key)
 	rets, err := cmd.Result()
 	if err != nil {
 		//log.Error("HGetAll error: %v (%s, %s)", err, cache.Name, key)
