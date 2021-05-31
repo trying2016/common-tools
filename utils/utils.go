@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"runtime"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -181,4 +182,27 @@ func SafeGo(callBack func(), panicFn func(err interface{})) {
 		}()
 		callBack()
 	}()
+}
+
+// 最长执行时间，返回是否超时
+func RunTimeout(fn func(), millisecond int64) bool{
+	var job sync.WaitGroup
+	chTimeout := make(chan struct{})
+
+	job.Add(1)
+	go func() {
+		fn()
+		job.Done()
+	}()
+	go func() {
+		job.Wait()
+		chTimeout <- struct{}{}
+	}()
+
+	select {
+	case <-time.After(time.Millisecond * time.Duration(millisecond)):
+		return true
+	case <-chTimeout:
+		return false
+	}
 }
