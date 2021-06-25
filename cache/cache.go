@@ -69,7 +69,15 @@ func (cache *Cache) HSet(key string, field string, value interface{}) (err error
 	}
 	return
 }
-
+func (cache *Cache) HMSet(key string, fields map[string]interface{}) (err error) {
+	client, err := cache.GetClient()
+	if err != nil {
+		//log.Error("GetClient error: %v ", err)
+		return err
+	}
+	err = client.HMSet(cache.Name+key, fields).Err()
+	return err
+}
 func (cache *Cache) HGet(key string, field string) (ret string, err error) {
 	client, err := cache.GetClient()
 	if err != nil {
