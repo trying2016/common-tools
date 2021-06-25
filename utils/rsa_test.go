@@ -6,7 +6,7 @@ import (
 )
 
 func TestGenerateKey(t *testing.T) {
-	privateKey, publicKey, err := GenerateKey(256)
+	privateKey, publicKey, err := GenerateKey(1024)
 	if err != nil {
 		t.Error(err)
 		return
