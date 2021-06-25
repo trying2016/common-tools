@@ -330,3 +330,16 @@ func (cache *Cache) Publish(channel string, message interface{}) error {
 	cmd := client.Publish(cache.Name+channel, message)
 	return cmd.Err()
 }
+
+func (cache *Cache) HDel(key string, fields ...string) error {
+	client, err := cache.GetClient()
+	if err != nil {
+		return err
+	}
+	arr := make([]string, len(fields))
+	for i, v := range fields {
+		arr[i] = cache.Name + v
+	}
+	cmd := client.HDel(cache.Name+key, arr...)
+	return cmd.Err()
+}
