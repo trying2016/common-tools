@@ -57,7 +57,7 @@ func (cache *Cache) GetClient() (*redis.Client, error) {
 	}
 }
 
-func (cache *Cache) HSet(key string, field string, value string) (err error) {
+func (cache *Cache) HSet(key string, field string, value interface{}) (err error) {
 	client, err := cache.GetClient()
 	if err != nil {
 		//log.Error("GetClient error: %v ", err)
@@ -84,13 +84,13 @@ func (cache *Cache) HGet(key string, field string) (ret string, err error) {
 	return
 }
 
-func (cache *Cache) HMGet(key string, args ...interface{}) (rets []string, err error) {
+func (cache *Cache) HMGet(key string, args ...string) (rets []string, err error) {
 	client, err := cache.GetClient()
 	if err != nil {
 		//log.Error("GetClient error: %v ", err)
 		return nil, err
 	}
-	cmd := client.HMGet(cache.Name + key)
+	cmd := client.HMGet(cache.Name+key, args...)
 	err = cmd.Err()
 	if err != nil {
 		//log.Error("HMGet error: %v (%s, %s)", err, cache.Name, key)
