@@ -268,3 +268,65 @@ func (cache *Cache) Keys(key string) ([]string, error) {
 	}
 	return cmd.Result()
 }
+
+func (cache *Cache) Rename(key, newKey string) (err error) {
+	client, err := cache.GetClient()
+	if err != nil {
+		return err
+	}
+	cmd := client.Rename(cache.Name+key, cache.Name+newKey)
+	return cmd.Err()
+}
+
+// 获取所有key
+func (cache *Cache) HKeys(key string) ([]string, error) {
+	client, err := cache.GetClient()
+	if err != nil {
+		//log.Error("GetClient error: %v ", err)
+		return nil, err
+	}
+	cmd := client.HKeys(cache.Name + key)
+	if cmd.Err() != nil {
+		//log.Error("Keys error: %v (%s, %s)", cmd.Err(), cache.Name, key)
+	}
+	return cmd.Result()
+}
+func (cache *Cache) HLen(key string) int {
+	client, err := cache.GetClient()
+	if err != nil {
+		//log.Error("GetClient error: %v ", err)
+		return 0
+	}
+	cmd := client.HLen(cache.Name + key)
+	ret, err := cmd.Result()
+	if err != nil {
+		//log.Error("LLen error: %v (%s, %s)", err, cache.Name, key)
+	}
+	return int(ret)
+}
+
+func (cache *Cache) Subscribe(fn func(message *redis.Message, err error), channel string) error {
+	client, err := cache.GetClient()
+	if err != nil {
+		return err
+	}
+	ch := client.Subscribe(cache.Name + channel)
+	go func() {
+		for {
+			msg, err := ch.ReceiveMessage()
+			fn(msg, err)
+		}
+	}()
+
+	return nil
+}
+
+// publish
+func (cache *Cache) Publish(channel string, message interface{}) error {
+	client, err := cache.GetClient()
+	if err != nil {
+		return err
+	}
+	cmd := client.Publish(cache.Name+channel, message)
+	return cmd.Err()
+}
