@@ -344,10 +344,6 @@ func (cache *Cache) HDel(key string, fields ...string) error {
 	if err != nil {
 		return err
 	}
-	arr := make([]string, len(fields))
-	for i, v := range fields {
-		arr[i] = cache.Name + v
-	}
-	cmd := client.HDel(cache.Name+key, arr...)
+	cmd := client.HDel(cache.Name+key, fields...)
 	return cmd.Err()
 }
