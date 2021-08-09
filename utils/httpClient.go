@@ -140,6 +140,14 @@ func (hClient *HttpClient) Post(link string) ([]byte, error) {
 	return hClient.do("POST", link, hClient.postContents)
 }
 
+// Put
+func (hClient *HttpClient) Put(link string) ([]byte, error) {
+	if hClient.postContents == nil || len(hClient.postContents) == 0 {
+		hClient.postContents = hClient.GetPostData()
+	}
+	return hClient.do("PUT", link, hClient.postContents)
+}
+
 func (hClient *HttpClient) Get(link string) ([]byte, error) {
 	strForm := string(hClient.GetPostData())
 	if strForm != "" {
