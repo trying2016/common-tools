@@ -3,7 +3,6 @@ package utils
 import "C"
 
 import (
-	"fmt"
 	"syscall"
 	"unsafe"
 )
@@ -26,10 +25,7 @@ const (
 func DiskUsage(path string) (disk DiskStatus) {
 	h := syscall.MustLoadDLL("kernel32.dll")
 	c := h.MustFindProc("GetDiskFreeSpaceExW")
-	_, _, err := c.Call(uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(path))),
+	_, _, _ = c.Call(uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(path))),
 		uintptr(unsafe.Pointer(&disk.Free)), uintptr(unsafe.Pointer(&disk.All)), uintptr(unsafe.Pointer(&disk.Used)))
-	if err != nil {
-		fmt.Println(err)
-	}
 	return
 }
