@@ -3,6 +3,7 @@ package utils
 import (
 	"bytes"
 	"compress/gzip"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -30,6 +31,7 @@ type HttpClient struct {
 	proxy         string
 	Host          string
 	response      *http.Response
+	ctx           *context.Context
 }
 
 func NewHttpClient() *HttpClient {
@@ -66,6 +68,10 @@ func (hClient *HttpClient) getQuery() string {
 		}
 	}
 	return str
+}
+
+func (hClient *HttpClient) SetContext(ctx *context.Context) {
+	hClient.ctx = ctx
 }
 
 // Set contents type
@@ -232,6 +238,10 @@ func (hClient *HttpClient) do(method string, link string, data []byte) ([]byte, 
 		}
 	} else {
 		request, err = http.NewRequest(method, link, nil)
+	}
+
+	if hClient.ctx != nil {
+		request = request.WithContext(*hClient.ctx)
 	}
 
 	// clean postdata
