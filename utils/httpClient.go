@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"mime/multipart"
 	"net"
 	"net/http"
 	"net/url"
@@ -15,8 +16,9 @@ import (
 )
 
 const (
-	POST_DATA_TYPE_JSON = 1
-	POST_DATA_TYPE_FORM = 2
+	POST_DATA_TYPE_JSON      = 1
+	POST_DATA_TYPE_FORM      = 2
+	POST_DATA_TYPE_MULTIPART = 3
 )
 
 type HttpClient struct {
@@ -181,6 +183,25 @@ func (hClient *HttpClient) GetPostData() []byte {
 		hClient.postData = nil
 		hClient.AddHeader("Content-Type", "application/json; charset=utf-8")
 		return data
+	} else if hClient.postDataType == POST_DATA_TYPE_MULTIPART{
+		buf := new(bytes.Buffer)
+		w := multipart.NewWriter(buf)
+
+		for key, value := range hClient.postData {
+			if fw, err := w.CreateFormField(key); err == nil {
+				switch vv := value.(type) {
+				case []byte:
+					_, _ = fw.Write(vv)
+				case string:
+					_, _ = fw.Write([]byte(vv))
+				default:
+					_, _ = fw.Write([]byte(ToString(value)))
+				}
+			}
+		}
+		_ = w.Close()
+		hClient.AddHeader("Content-Type", w.FormDataContentType())
+		return buf.Bytes()
 	} else {
 		var data string
 		for key, value := range hClient.postData {
