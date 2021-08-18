@@ -188,13 +188,17 @@ func (hClient *HttpClient) GetPostData() []byte {
 		w := multipart.NewWriter(buf)
 
 		for key, value := range hClient.postData {
-			if fw, err := w.CreateFormField(key); err == nil {
-				switch vv := value.(type) {
-				case []byte:
-					_, _ = fw.Write(vv)
-				case string:
+			switch vv := value.(type) {
+			case []byte:
+				if createFormFile, err := w.CreateFormFile(key, ""); err == nil {
+					_, _ = createFormFile.Write(vv)
+				}
+			case string:
+				if fw, err := w.CreateFormField(key); err == nil {
 					_, _ = fw.Write([]byte(vv))
-				default:
+				}
+			default:
+				if fw, err := w.CreateFormField(key); err == nil {
 					_, _ = fw.Write([]byte(ToString(value)))
 				}
 			}
