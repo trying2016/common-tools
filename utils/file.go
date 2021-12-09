@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"io"
 	"io/ioutil"
 	"os"
 	"path"
@@ -91,7 +92,7 @@ func prepareDirs(dirs []string) ([]string, [][]os.FileInfo) {
 
 func GetFileList(fileDir, suffix string) []*FileList {
 	isRecursion := false
-	if len(fileDir) != 0 && fileDir[len(fileDir)-1] == '*'{
+	if len(fileDir) != 0 && fileDir[len(fileDir)-1] == '*' {
 		isRecursion = true
 		fileDir = fileDir[:len(fileDir)-2]
 	}
@@ -101,8 +102,8 @@ func GetFileList(fileDir, suffix string) []*FileList {
 	for idx, dbDir := range arrDirs {
 		for _, fi := range arrInfos[idx] {
 			fileName := fi.Name()
-			if fi.IsDir() && isRecursion{
-				fileList := GetFileList(path.Join(dbDir,fileName), suffix)
+			if fi.IsDir() && isRecursion {
+				fileList := GetFileList(path.Join(dbDir, fileName), suffix)
 				if len(fileList) != 0 {
 					arrFileLists = append(arrFileLists, fileList...)
 				}
@@ -120,4 +121,32 @@ func GetFileList(fileDir, suffix string) []*FileList {
 		}
 	}
 	return arrFileLists
+}
+
+// CopyFile 复制文件
+func CopyFile(orgFile, newFile string) error {
+	orgF, err := os.Open(orgFile)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = orgF.Close() }()
+	newF, err := os.Create(newFile)
+	if err != nil {
+		return err
+	}
+	defer func() { _ = newF.Close() }()
+	_, err = io.Copy(newF, orgF)
+	if err != nil {
+		return err
+	}
+	return newF.Sync()
+}
+
+// MoveFile 移动文件
+func MoveFile(orgFile, newFile string) error {
+	err := CopyFile(orgFile, newFile)
+	if err != nil {
+		return err
+	}
+	return os.Remove(orgFile)
 }
