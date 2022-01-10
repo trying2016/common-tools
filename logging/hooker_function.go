@@ -57,7 +57,7 @@ func (h *functionHooker) Fire(entry *logrus.Entry) error {
 	if h.innerLogger.CallRelation == MsgFormatMulti {
 		h.fires(entry)
 	} else if h.innerLogger.CallRelation == MsgFormatSingle {
-		h.fire(entry)
+		//h.fire(entry)
 	}
 	return nil
 }

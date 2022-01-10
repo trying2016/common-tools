@@ -2,8 +2,6 @@ package logging
 
 import (
 	"bytes"
-	"github.com/trying2016/common-tools/log"
-	"github.com/trying2016/common-tools/utils"
 	"os"
 	"runtime"
 	"strconv"
@@ -97,23 +95,33 @@ func convertLevel(level string) logrus.Level {
 
 // Init loggers
 func Init(path, filename string, level string, age uint32, disableCPrint bool) {
-	log.Init(level, path, 5*utils.MB)
-	return
-	fileHooker := NewFileRotateHooker(path, filename, age, nil)
-
 	vlog = NewLogger()
 	LoadFunctionHooker(vlog)
-	vlog.Hooks.Add(fileHooker)
+
+	var fileHooker logrus.Hook
+	if path != "" {
+		fileHooker = NewFileRotateHooker(path, filename, age, nil)
+		vlog.Hooks.Add(fileHooker)
+	}
+
 	vlog.Out = &emptyWriter{}
-	vlog.Formatter = &logrus.TextFormatter{FullTimestamp: true}
+	vlog.Formatter = &logrus.TextFormatter{
+		FullTimestamp:   true,
+		TimestampFormat: "2006-01-02 15:04 05",
+	}
 	vlog.Level = convertLevel(level)
 
 	if !disableCPrint {
 		clog = NewLogger()
 		LoadFunctionHooker(clog)
-		clog.Hooks.Add(fileHooker)
+		if path != "" {
+			clog.Hooks.Add(fileHooker)
+		}
 		clog.Out = os.Stdout
-		clog.Formatter = &logrus.TextFormatter{FullTimestamp: true}
+		clog.Formatter = &logrus.TextFormatter{
+			FullTimestamp:   true,
+			TimestampFormat: "2006-01-02 15:04 05",
+		}
 		clog.Level = convertLevel(level)
 	} else {
 		clog = vlog
@@ -137,15 +145,6 @@ func GetGID() uint64 {
 
 // CPrint into stdout + log
 func CPrint(level uint32, msg string, formats ...LogFormat) {
-	if level == INFO {
-		log.Info("%v %v", msg, formats)
-	}else if level == ERROR {
-		log.Error("%v %v", msg, formats)
-	}else if level == WARN {
-		log.Warn("%v %v", msg, formats)
-	}else{
-		return
-	}
 	if clog == nil {
 		Init("./log", "miner.log", "info", 0, false)
 	}
@@ -271,6 +270,6 @@ func mergeLogFormats(formats ...LogFormat) LogFormat {
 			format[k] = vv
 		}
 	}
-	format["tid"] = GetGID()
+	//format["tid"] = GetGID()
 	return format
 }
