@@ -9,16 +9,6 @@ import (
 	"strings"
 )
 
-func DownloadFile(link, filePath string) (err error) {
-	http := HttpClient{}
-	data, err := http.Get(link)
-	if err != nil {
-		return
-	}
-	err = ioutil.WriteFile(filePath, data, 0666)
-	return
-}
-
 func SafeCreateDir(path string) {
 	if exists := PathExists(path); exists {
 		return

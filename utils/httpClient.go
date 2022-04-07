@@ -183,7 +183,7 @@ func (hClient *HttpClient) GetPostData() []byte {
 		hClient.postData = nil
 		hClient.AddHeader("Content-Type", "application/json; charset=utf-8")
 		return data
-	} else if hClient.postDataType == POST_DATA_TYPE_MULTIPART{
+	} else if hClient.postDataType == POST_DATA_TYPE_MULTIPART {
 		buf := new(bytes.Buffer)
 		w := multipart.NewWriter(buf)
 
@@ -336,7 +336,8 @@ func (hClient *HttpClient) do(method string, link string, data []byte) ([]byte, 
 
 			if err == nil {
 				// gzip decompress
-				if strings.Contains(response.Header.Get("Accept-Encoding"), "gzip") {
+				if strings.Contains(response.Header.Get("Accept-Encoding"), "gzip") ||
+					strings.Contains(response.Header.Get("Content-Encoding"), "gzip") {
 					gzipReader, err := gzip.NewReader(bytes.NewReader(data))
 					if err != nil {
 						return data, nil
