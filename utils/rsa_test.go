@@ -6,7 +6,7 @@ import (
 )
 
 func TestGenerateKey(t *testing.T) {
-	privateKey, publicKey, err := GenerateKey(1024)
+	privateKey, publicKey, err := GenerateKey(256)
 	if err != nil {
 		t.Error(err)
 		return
@@ -46,13 +46,16 @@ func TestGenerateSig(t *testing.T) {
 }
 
 func TestRsaEncrypt(t *testing.T) {
-	privateKey, publicKey, err := GenerateKey(256)
+	privateKey, publicKey, err := GenerateKey(2048)
 	if err != nil {
 		t.Fatalf("GenerateKey fail, error: %v", err)
 	}
 	fmt.Printf("Private Key :%s \n", privateKey)
 	fmt.Printf("Public Key :%s \n", publicKey)
-	enRet, err := RsaEncrypt(publicKey, "123123")
+	enRet, err := RsaEncrypt(publicKey, Map{
+		"fpk":         "a76c35ca3c043c0a3a14c8aa4cc528e5010ac45df9845f69fdb1273e7895bdf624f4b78508ba0e293e997a75f3108454",
+		"fingerprint": 1,
+	}.ToJson())
 	if err != nil {
 		t.Fatalf("RsaEncrypt fail, error: %v", err)
 	}
