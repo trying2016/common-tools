@@ -140,3 +140,20 @@ func MoveFile(orgFile, newFile string) error {
 	}
 	return os.Remove(orgFile)
 }
+
+// GetFileSize file size
+func GetFileSize(fileName string) int64 {
+	file, err := os.OpenFile(fileName, os.O_RDONLY, 0666)
+	if err == nil {
+		defer func() {
+			_ = file.Close()
+		}()
+		fi, err := file.Stat()
+		if err != nil {
+			return 0
+		}
+
+		return fi.Size()
+	}
+	return 0
+}
