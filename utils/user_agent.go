@@ -6,7 +6,7 @@ func ConvertUserAgentToReadable(ua string) string {
 	info := make([]string, 0, 2)
 	uaLow := strings.ToLower(ua)
 	if strings.HasPrefix(uaLow, "okhttp/") {
-		info = append(info, "App")
+		info = append(info, "Android")
 	} else {
 		// device
 		if strings.Contains(uaLow, "android") {
