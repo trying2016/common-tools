@@ -43,6 +43,7 @@ func (q *Queue) Count() int64 {
 func (q *Queue) Destroy() {
 	q.exitSignal <- struct{}{}
 	q.jobWaiter.Wait()
+	close(q.queue)
 }
 
 func (q *Queue) run() {
