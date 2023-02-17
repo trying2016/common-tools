@@ -43,13 +43,17 @@ func TestHttpClient(t *testing.T) {
 	client := NewHttpClient()
 	client.SetContext(&ctx)
 	go func() {
-		time.Sleep(time.Second/20)
+		time.Sleep(time.Second / 20)
 		cancel()
 	}()
 	b, err := client.Get("https://www.hpool.com")
 	if err != nil {
 		fmt.Println(err)
-	}else{
+	} else {
 		fmt.Println(b)
 	}
+}
+
+func TestToString(t *testing.T) {
+	t.Log(ToString([]string{"1", "2", "s 1"}))
 }

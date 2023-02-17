@@ -1,9 +1,37 @@
 package utils
 
 import (
+	"encoding/hex"
 	"fmt"
 	"testing"
 )
+
+var (
+	publicKey   string
+	privateKey  string
+	encryptData string
+)
+
+func init() {
+	var err error
+	privateKey, publicKey, err = GenerateKey(1024)
+	if err != nil {
+		return
+	}
+	data, err := hex.DecodeString("a31bb3c0a683f42fad7c43ac50993dcdcb4b636195333f4bcdd34b5243881f0fd543bda03fc2d4ed7aa09351c1d8de1fdc4e19c1c1b918b7794d5d9de9a83af1d62b2feb27881c19e0fc482c82313b1ee77627c85b689f809aeb7efaf2c2cc7dcd2d6173783c684816715b62cf99bd0475cde801f596a463884eee5668e9d4e9b7fc416aac816e0100")
+	if err == nil {
+		encryptData, err := RsaEncryptRaw(publicKey, data)
+		if err != nil {
+			fmt.Println(err)
+		} else {
+			fmt.Println(hex.EncodeToString(encryptData))
+		}
+	}
+	encryptData, err = RsaEncrypt(publicKey, "a31bb3c0a683f42fad7c43ac50993dcdcb4b636195333f4bcdd34b5243881f0fd543bda03fc2d4ed7aa09351c1d8de1fdc4e19c1c1b918b7794d5d9de9a83af1d62b2feb27881c19e0fc482c82313b1ee77627c85b689f809aeb7efaf2c2cc7dcd2d6173783c684816715b62cf99bd0475cde801f596a463884eee5668e9d4e9b7fc416aac816e0100")
+	if err != nil {
+		fmt.Println(err)
+	}
+}
 
 func TestGenerateKey(t *testing.T) {
 	privateKey, publicKey, err := GenerateKey(256)
@@ -78,4 +106,12 @@ func TestRsa(t *testing.T) {
 		t.Fatalf("RsaDecrypt fail, error: %v", err)
 	}
 	fmt.Printf("result %v", deStr)
+}
+
+func BenchmarkRsa(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		if _, err := RsaDecrypt(privateKey, encryptData); err != nil {
+			b.Error(err)
+		}
+	}
 }

@@ -106,6 +106,24 @@ func RsaEncrypt(publicKey, strData string) (string, error) {
 		return hex.EncodeToString(ret), nil
 	}
 }
+func RsaEncryptRaw(publicKey string, strData []byte) ([]byte, error) {
+	block, _ := pem.Decode(Base64Decoding(publicKey))
+	if block == nil {
+		return nil, errors.New("pem decode fail")
+	}
+	pubInterface, err := x509.ParsePKIXPublicKey(block.Bytes)
+	if err != nil {
+		return nil, err
+	}
+	pub := pubInterface.(*rsa.PublicKey)
+
+	ret, err := rsa.EncryptPKCS1v15(rand.Reader, pub, []byte(strData))
+	if err != nil {
+		return nil, err
+	} else {
+		return ret, nil
+	}
+}
 
 // Rsa加密
 func RsaDecrypt(privateKey, strData string) (string, error) {

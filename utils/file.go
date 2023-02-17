@@ -81,18 +81,18 @@ func prepareDirs(dirs []string) ([]string, [][]os.FileInfo) {
 }
 
 func GetFileList(fileDir, suffix string) []*FileList {
-	isRecursion := false
-	if len(fileDir) != 0 && fileDir[len(fileDir)-1] == '*' {
-		isRecursion = true
-		fileDir = fileDir[:len(fileDir)-2]
-	}
+	//isRecursion := true
+	//if len(fileDir) != 0 && fileDir[len(fileDir)-1] == '*' {
+	//	isRecursion = true
+	//	fileDir = fileDir[:len(fileDir)-2]
+	//}
 	arrFileLists := make([]*FileList, 0)
 	suffixUp := strings.ToUpper(suffix)
 	arrDirs, arrInfos := prepareDirs([]string{fileDir})
 	for idx, dbDir := range arrDirs {
 		for _, fi := range arrInfos[idx] {
 			fileName := fi.Name()
-			if fi.IsDir() && isRecursion {
+			if fi.IsDir() {
 				fileList := GetFileList(path.Join(dbDir, fileName), suffix)
 				if len(fileList) != 0 {
 					arrFileLists = append(arrFileLists, fileList...)
