@@ -185,10 +185,9 @@ func SafeGo(callBack func(), panicFn func(err interface{})) {
 }
 
 // 最长执行时间，返回是否超时
-func RunTimeout(fn func(), millisecond int64) bool{
+func RunTimeout(fn func(), millisecond int64) bool {
 	var job sync.WaitGroup
 	chTimeout := make(chan struct{})
-
 	job.Add(1)
 	go func() {
 		fn()
@@ -197,6 +196,7 @@ func RunTimeout(fn func(), millisecond int64) bool{
 	go func() {
 		job.Wait()
 		chTimeout <- struct{}{}
+		close(chTimeout)
 	}()
 
 	select {

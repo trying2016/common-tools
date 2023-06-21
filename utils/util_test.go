@@ -57,3 +57,13 @@ func TestHttpClient(t *testing.T) {
 func TestToString(t *testing.T) {
 	t.Log(ToString([]string{"1", "2", "s 1"}))
 }
+
+func TestRunTimeout(t *testing.T) {
+	timeout := RunTimeout(func() {
+		time.Sleep(time.Second * 2)
+		t.Log("Sleep 2s")
+	}, 1000)
+	t.Log(timeout)
+
+	time.Sleep(time.Second * 3)
+}

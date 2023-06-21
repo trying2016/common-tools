@@ -1,7 +1,5 @@
 package utils
 
-import "C"
-
 import (
 	"syscall"
 	"unsafe"
