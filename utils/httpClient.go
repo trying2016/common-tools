@@ -34,6 +34,7 @@ type HttpClient struct {
 	Host          string
 	response      *http.Response
 	ctx           *context.Context
+	notRedirect   bool
 }
 
 func NewHttpClient() *HttpClient {
@@ -55,6 +56,10 @@ func (hClient *HttpClient) AddQuery(key string, value interface{}) {
 		hClient.queryMap = make(map[string]interface{})
 	}
 	hClient.queryMap[key] = value
+}
+
+func (hClient *HttpClient) SetRedirect(redirect bool) {
+	hClient.redirect = redirect
 }
 
 func (hClient *HttpClient) getQuery() string {
@@ -292,9 +297,12 @@ func (hClient *HttpClient) do(method string, link string, data []byte) ([]byte, 
 		var transport *http.Transport = nil
 		netClient := &http.Client{
 			Timeout: hClient.timeOut,
-			//CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			//	return http.ErrUseLastResponse /* 不进入重定向 */
-			//},
+			CheckRedirect: func(req *http.Request, via []*http.Request) error {
+				if hClient.notRedirect {
+					return http.ErrUseLastResponse /* 不进入重定向 */
+				}
+				return nil
+			},
 		}
 		if hClient.proxy != "" {
 			URL := url.URL{}
