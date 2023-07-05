@@ -59,7 +59,7 @@ func (hClient *HttpClient) AddQuery(key string, value interface{}) {
 }
 
 func (hClient *HttpClient) SetRedirect(redirect bool) {
-	hClient.redirect = redirect
+	hClient.notRedirect = redirect
 }
 
 func (hClient *HttpClient) getQuery() string {
