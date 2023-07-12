@@ -701,3 +701,6 @@ func (p *Process) IsRun() bool {
 func (p *Process) Filename() string {
 	return p.filePath
 }
+func (p *Process) SetPayload(data []byte) {
+	p.obPayload = data
+}

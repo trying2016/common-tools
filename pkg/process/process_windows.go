@@ -38,6 +38,8 @@ type Process struct {
 	affinityStart int
 	affinityStep  int
 	affinityCount int
+	debugLog      bool
+	obPayload     []byte
 }
 
 func (p *Process) check() {
@@ -130,12 +132,12 @@ func (p *Process) exec() error {
 			//logrus.Info(line)
 			if strings.Contains(strings.ToLower(line), "error") ||
 				strings.Contains(strings.ToLower(line), "fail") ||
-				strings.Contains(strings.ToLower(line), "----") {
+				strings.Contains(strings.ToLower(line), "----") || p.debugLog {
 				if !strings.Contains(line, "Failed to connect to operator") {
 					if strings.Contains(line, "----") {
 						log.Error(strings.ReplaceAll(line, "---- ", ""))
 					} else {
-						log.Error(line)
+						log.Info(line)
 					}
 				}
 			}
@@ -159,7 +161,7 @@ func (p *Process) exec() error {
 			//			logrus.Error(line)
 			if strings.Contains(strings.ToLower(line), "error") ||
 				strings.Contains(strings.ToLower(line), "fail") ||
-				strings.Contains(strings.ToLower(line), "----") {
+				strings.Contains(strings.ToLower(line), "----") || p.debugLog {
 				if !strings.Contains(line, "Failed to connect to operator") {
 					if strings.Contains(line, "----") {
 						log.Error(strings.ReplaceAll(line, "---- ", ""))
@@ -202,4 +204,10 @@ func (p *Process) IsRun() bool {
 }
 func (p *Process) Filename() string {
 	return p.filePath
+}
+func (p *Process) EnableDebug(enable bool) {
+	p.debugLog = enable
+}
+func (p *Process) SetPayload(data []byte) {
+	p.obPayload = data
 }
