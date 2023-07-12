@@ -19,6 +19,6 @@ require (
 	github.com/tebeka/strftime v0.1.5 // indirect
 	github.com/tidwall/gjson v1.14.3
 	github.com/xxtea/xxtea-go v0.0.0-20170828040851-35c4b17eecf6
-	golang.org/x/sys v0.0.0-20191120155948-bd437916bb0e // indirect
+	golang.org/x/sys v0.0.0-20191120155948-bd437916bb0e
 	gopkg.in/yaml.v2 v2.4.0
 )
