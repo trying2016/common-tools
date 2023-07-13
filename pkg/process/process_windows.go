@@ -1,12 +1,10 @@
-//go:build windows
-// +build windows
-
 package process
 
 import (
 	"bufio"
 	"github.com/sirupsen/logrus"
 	"github.com/trying2016/common-tools/log"
+	"github.com/trying2016/common-tools/pkg/cpu"
 	"github.com/trying2016/common-tools/utils"
 	"io"
 	"os"
@@ -16,7 +14,6 @@ import (
 	"strings"
 	"sync"
 	"syscall"
-	"x-proxy/pkg/cpu"
 )
 
 const (
