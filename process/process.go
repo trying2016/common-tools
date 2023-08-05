@@ -3,14 +3,13 @@ package process
 import (
 	"bufio"
 	"github.com/sirupsen/logrus"
-	"github.com/trying2016/common-tools/log"
+	"github.com/trying2016/common-tools/logging"
 	"github.com/trying2016/common-tools/pkg/cpu"
 	"github.com/trying2016/common-tools/utils"
 	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"sync"
 	"syscall"
@@ -74,17 +73,14 @@ func (p *Process) Run(restartTime int) error {
 
 func (p *Process) exec() error {
 	fileDir := filepath.Dir(p.filePath)
-	args := make([]string, 0)
-	if runtime.GOOS == "windows" {
-		//args = append(args, p.filePath)
-		args = append(args, p.args...)
-	} else {
-		args = append(args, p.args...)
-	}
-	cmd := exec.Command(p.filePath, args...)
+
+	cmd := exec.Command(p.filePath, p.args...)
 	//cmd := exec.Command(p.filePath)
 	cmd.Dir = fileDir
 	//cmd.Env = p.evn
+	//for _, v := range args {
+	//	fmt.Print(" " + v)
+	//}
 
 	//defaultEvn,_ := execenv.Default(cmd.SysProcAttr)
 	cmd.Env = append(syscall.Environ(), p.evn...)
@@ -132,9 +128,11 @@ func (p *Process) exec() error {
 				strings.Contains(strings.ToLower(line), "----") || p.debugLog {
 				if !strings.Contains(line, "Failed to connect to operator") {
 					if strings.Contains(line, "----") {
-						log.Error(strings.ReplaceAll(line, "---- ", ""))
+						logging.CPrint(logging.INFO, strings.ReplaceAll(line, "---- ", ""))
 					} else {
-						log.Info(line)
+						if line != "" {
+							logging.CPrint(logging.INFO, line)
+						}
 					}
 				}
 			}
@@ -155,23 +153,17 @@ func (p *Process) exec() error {
 			}
 			line = strings.ReplaceAll(line, "\n", "")
 			line = strings.ReplaceAll(line, "\r", "")
-			//			logrus.Error(line)
-			if strings.Contains(strings.ToLower(line), "error") ||
-				strings.Contains(strings.ToLower(line), "fail") ||
-				strings.Contains(strings.ToLower(line), "----") || p.debugLog {
-				if !strings.Contains(line, "Failed to connect to operator") {
-					if strings.Contains(line, "----") {
-						log.Error(strings.ReplaceAll(line, "---- ", ""))
-					} else {
-						//fmt.Println(line)
-						log.Error(line)
-					}
+			if line != "" {
+				if strings.Contains(strings.ToLower(line), "error") {
+					logging.CPrint(logging.ERROR, line)
+				} else {
+					logging.CPrint(logging.INFO, line)
 				}
 			}
 		}
 	}()
 
-	go func(pCmd *exec.Cmd) {
+	func(pCmd *exec.Cmd) {
 		if err := pCmd.Wait(); err != nil {
 			logrus.Errorf("exit %v %v", p.filePath, err.Error())
 		}
