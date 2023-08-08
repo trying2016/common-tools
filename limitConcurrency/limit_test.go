@@ -1,4 +1,4 @@
-package limitProcess
+package limitConcurrency
 
 import (
 	"fmt"

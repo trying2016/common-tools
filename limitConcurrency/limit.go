@@ -7,7 +7,7 @@
  * @Date: 2023/8/8 10:36
  */
 
-package limitProcess
+package limitConcurrency
 
 import (
 	"context"
@@ -19,17 +19,17 @@ type Wait struct {
 	ch chan struct{}
 }
 
-type LimitProcess struct {
+type LimitConcurrency struct {
 	queue *queue.Queue
 }
 
-func NewLimit(limitSize, bufSize int) *LimitProcess {
-	limit := &LimitProcess{}
+func NewLimit(limitSize, bufSize int) *LimitConcurrency {
+	limit := &LimitConcurrency{}
 	limit.queue = queue.NewNormal(context.Background(), bufSize, limit.run, limitSize)
 	return limit
 }
 
-func (l *LimitProcess) Request(fn func()) {
+func (l *LimitConcurrency) Request(fn func()) {
 	ch := make(chan struct{})
 
 	l.queue.Push(&Wait{
@@ -39,7 +39,7 @@ func (l *LimitProcess) Request(fn func()) {
 	<-ch
 }
 
-func (l *LimitProcess) run(v interface{}) {
+func (l *LimitConcurrency) run(v interface{}) {
 	wait := v.(*Wait)
 	wait.fn()
 	wait.ch <- struct{}{}
