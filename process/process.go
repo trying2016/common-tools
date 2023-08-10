@@ -3,8 +3,8 @@ package process
 import (
 	"bufio"
 	"github.com/sirupsen/logrus"
+	"github.com/trying2016/common-tools/cpu"
 	"github.com/trying2016/common-tools/logging"
-	"github.com/trying2016/common-tools/pkg/cpu"
 	"github.com/trying2016/common-tools/utils"
 	"io"
 	"os"
