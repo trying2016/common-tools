@@ -248,6 +248,13 @@ func (hClient *HttpClient) do(method string, link string, data []byte) ([]byte, 
 		}
 	}
 
+	var ctx context.Context
+	if hClient.ctx != nil {
+		ctx = *hClient.ctx
+	} else {
+		ctx = context.Background()
+	}
+
 	var request *http.Request
 	var err error
 	if data != nil && len(data) != 0 {
@@ -260,19 +267,19 @@ func (hClient *HttpClient) do(method string, link string, data []byte) ([]byte, 
 				fmt.Println("-----gzip is faild,err:", err)
 			}
 			zipWrite.Close()
-			request, err = http.NewRequest(method, link, &zBuf)
+			request, err = http.NewRequestWithContext(ctx, method, link, &zBuf)
 			request.Header.Add("Content-Encoding", "gzip")
 			//request.Header.Add("Accept-Encoding", "gzip")
 		} else {
-			request, err = http.NewRequest(method, link, bytes.NewReader(data))
+			request, err = http.NewRequestWithContext(ctx, method, link, bytes.NewReader(data))
 		}
 	} else {
-		request, err = http.NewRequest(method, link, nil)
+		request, err = http.NewRequestWithContext(ctx, method, link, nil)
 	}
 
-	if hClient.ctx != nil {
-		request = request.WithContext(*hClient.ctx)
-	}
+	//if hClient.ctx != nil {
+	//	request = request.WithContext(*hClient.ctx)
+	//}
 
 	// clean postdata
 	// hClient.postContents = nil
