@@ -146,7 +146,7 @@ func GetGID() uint64 {
 // CPrint into stdout + log
 func CPrint(level uint32, msg string, formats ...LogFormat) {
 	if clog == nil {
-		Init("./log", "miner.log", "info", 0, false)
+		Init("", "miner.log", "info", 0, false)
 	}
 	data := mergeLogFormats(formats...)
 	switch level {
@@ -203,7 +203,7 @@ func CPrint(level uint32, msg string, formats ...LogFormat) {
 // VPrint into log
 func VPrint(level uint32, msg string, formats ...LogFormat) {
 	if vlog == nil {
-		Init("/tmp", "tmp-mass.log", "info", 0, false)
+		Init("", "tmp-mass.log", "info", 0, false)
 	}
 	data := mergeLogFormats(formats...)
 	switch level {
