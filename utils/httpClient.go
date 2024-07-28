@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -22,19 +23,20 @@ const (
 )
 
 type HttpClient struct {
-	postData      map[string]interface{} //
-	postContents  []byte
-	headers       map[string]string
-	timeOut       time.Duration
-	postDataType  int
-	useGZip       bool
-	receiveCookie string
-	queryMap      map[string]interface{}
-	proxy         string
-	Host          string
-	response      *http.Response
-	ctx           *context.Context
-	notRedirect   bool
+	postData            map[string]interface{} //
+	postContents        []byte
+	headers             map[string]string
+	timeOut             time.Duration
+	postDataType        int
+	useGZip             bool
+	receiveCookie       string
+	queryMap            map[string]interface{}
+	proxy               string
+	Host                string
+	response            *http.Response
+	ctx                 *context.Context
+	notRedirect         bool
+	skipTLSVerification bool
 }
 
 func NewHttpClient() *HttpClient {
@@ -60,6 +62,10 @@ func (hClient *HttpClient) AddQuery(key string, value interface{}) {
 
 func (hClient *HttpClient) SetRedirect(redirect bool) {
 	hClient.notRedirect = redirect
+}
+
+func (hClient *HttpClient) SetSkipTLSVerification(skipTLSVerification bool) {
+	hClient.skipTLSVerification = skipTLSVerification
 }
 
 func (hClient *HttpClient) getQuery() string {
@@ -130,7 +136,6 @@ func (hClient *HttpClient) AddHeader(key, value string) {
 	hClient.headers[key] = value
 }
 
-//
 func (hClient *HttpClient) EncodingGZip(bUse bool) {
 	hClient.useGZip = bUse
 }
@@ -326,7 +331,11 @@ func (hClient *HttpClient) do(method string, link string, data []byte) ([]byte, 
 				MaxIdleConnsPerHost:   10,                             //每个host最大空闲连接
 				ResponseHeaderTimeout: time.Second * time.Duration(5), //数据收发5秒超时
 			}
+			if hClient.skipTLSVerification {
+				transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+			}
 		}
+
 		if transport != nil {
 			netClient.Transport = transport
 		}
