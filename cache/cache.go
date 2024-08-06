@@ -15,7 +15,7 @@ type RedisConfig struct {
 	Port     int
 }
 
-var errClientNull = errors.New("Redis client is null")
+var errClientNull = errors.New("redis client is null")
 
 func init() {
 
