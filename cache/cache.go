@@ -149,6 +149,16 @@ func (cache *Cache) Set(key string, value interface{}, expiration time.Duration)
 	return
 }
 
+// SetNX set if not exists
+func (cache *Cache) SetNX(key string, value interface{}, expiration time.Duration) (bool, error) {
+	client, err := cache.GetClient()
+	if err != nil {
+		return false, err
+	}
+	cmd := client.SetNX(cache.Name+key, value, expiration)
+	return cmd.Val(), cmd.Err()
+}
+
 func (cache *Cache) LLen(key string) int {
 	client, err := cache.GetClient()
 	if err != nil {
