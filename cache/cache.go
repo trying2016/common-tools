@@ -223,6 +223,36 @@ func (cache *Cache) LPop(key string) (str string, err error) {
 	return cmd.Result()
 }
 
+// LRem 移除列表元素
+func (cache *Cache) LRem(key string, count int64, value string) (int64, error) {
+	client, err := cache.GetClient()
+	if err != nil {
+		return 0, err
+	}
+	cmd := client.LRem(cache.Name+key, count, value)
+	return cmd.Result()
+}
+
+// RPopLPush 移除列表元素
+func (cache *Cache) RPopLPush(source, destination string) (str string, err error) {
+	client, err := cache.GetClient()
+	if err != nil {
+		return "", err
+	}
+	cmd := client.RPopLPush(cache.Name+source, cache.Name+destination)
+	return cmd.Result()
+}
+
+// LTrim 移除列表元素
+func (cache *Cache) LTrim(key string, start, stop int64) error {
+	client, err := cache.GetClient()
+	if err != nil {
+		return err
+	}
+	cmd := client.LTrim(cache.Name+key, start, stop)
+	return cmd.Err()
+}
+
 func (cache *Cache) RPop(key string) (str string, err error) {
 	client, err := cache.GetClient()
 	if err != nil {
