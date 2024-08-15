@@ -161,7 +161,7 @@ func PanicTrace(kb int) []byte {
 	return stack
 }
 
-// 安全的go run
+// SafeGo 安全的go run
 func SafeGo(callBack func(), panicFn func(err interface{})) {
 	go func() {
 		defer func() {
