@@ -71,7 +71,9 @@ void threadFunc(void *arg);
 
 void thread_run(void *arg) {
     thread_data *data = (thread_data *)arg;
-    set_thread_affinity(data->thread_index);
+    if (data->thread_index != -1){
+        set_thread_affinity(data->thread_index);
+    }
     data->f(data->arg);
     free(data);
 }
