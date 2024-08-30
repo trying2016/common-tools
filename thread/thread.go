@@ -14,10 +14,11 @@ package thread
 #include "thread.h"
 #include <stdio.h>
 void threadFunc(void *arg);
+
+#cgo linux LDFLAGS: -lpthread
 */
 import "C"
 import (
-	"runtime"
 	"unsafe"
 )
 
@@ -26,8 +27,11 @@ type CallbackWrapper struct {
 	callback func()
 }
 
+var callback func()
+
 //export threadFunc
 func threadFunc(arg unsafe.Pointer) {
+	//callback()
 	v := *(*uintptr)(arg)
 	fn := *(*func())(unsafe.Pointer(v))
 	fn()
@@ -40,8 +44,7 @@ func SetAffinity(cpu int) int {
 
 // CreateThread 创建线程
 func CreateThread(threadId int, fn func()) {
-	runtime.LockOSThread()
-	defer runtime.UnlockOSThread()
+	callback = fn
 	// Allocate memory in C for the function pointer
 	cFn := C.thread_func_t(C.threadFunc)
 	arg := C.malloc(C.size_t(unsafe.Sizeof(unsafe.Pointer(&fn))))

@@ -20,10 +20,15 @@ func TestSetAffinity(t *testing.T) {
 }
 
 func TestCreateThread(t *testing.T) {
-	CreateThread(1, func() {
-		t.Log("Hello, thread!")
-	})
-	time.Sleep(time.Second)
+	for i := 0; i < 16; i++ {
+		CreateThread(i, func() {
+			for i := 0; i < 10; i++ {
+				time.Sleep(time.Second)
+				t.Log("CreateThread", i)
+			}
+		})
+	}
+	time.Sleep(time.Second * 10)
 }
 
 func TestHardwareConcurrency(t *testing.T) {

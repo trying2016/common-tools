@@ -1,4 +1,6 @@
 // thread.c
+#define _GNU_SOURCE
+
 #include "thread.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,6 +15,8 @@
   #include <unistd.h>
   #include <sys/types.h>
   #include <sys/sysctl.h>
+
+  #include <sched.h> // Ensure this header is included for CPU_ZERO and CPU_SET
 #endif
 
 
@@ -26,9 +30,9 @@ set_thread_affinity(int cpuid)
     GROUP_AFFINITY affinity = { 0 };
     affinity.Mask = (KAFFINITY)(1ULL << core);
     affinity.Group = node;
-    bool success = SetThreadGroupAffinity(GetCurrentThread(), &affinity, nullptr);
+    BOOL success = SetThreadGroupAffinity(GetCurrentThread(), &affinity, NULL);
     if (!success) {
-        std::cerr << "Failed to set thread affinity for thread id: " << cpuid << " (error=" << GetLastError() << ")" << std::endl;
+        //std::cerr << "Failed to set thread affinity for thread id: " << cpuid << " (error=" << GetLastError() << ")" << std::endl;
         return GetLastError();
     }
     return 0;
@@ -52,7 +56,7 @@ set_thread_affinity(int cpuid)
 
     int rc = pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cs);
     if (rc != 0) {
-        std::cerr << "Failed to set thread affinity for thread id: " << cpuid << " (error=" << rc << ")" << std::endl;
+        // std::cerr << "Failed to set thread affinity for thread id: " << cpuid << " (error=" << rc << ")" << std::endl;
         return rc;
     }
     return 0;
