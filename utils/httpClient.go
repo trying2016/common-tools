@@ -22,6 +22,13 @@ const (
 	POST_DATA_TYPE_MULTIPART = 3
 )
 
+var callback func(url string, response []byte)
+
+// SetHttpClientCallback set callback
+func SetHttpClientCallback(cb func(url string, response []byte)) {
+	callback = cb
+}
+
 type HttpClient struct {
 	postData            map[string]interface{} //
 	postContents        []byte
@@ -357,6 +364,10 @@ func (hClient *HttpClient) do(method string, link string, data []byte) ([]byte, 
 			hClient.response = response
 			data, err := ioutil.ReadAll(response.Body)
 			response.Body.Close()
+
+			if callback != nil {
+				callback(link, data)
+			}
 
 			if err == nil {
 				// gzip decompress
