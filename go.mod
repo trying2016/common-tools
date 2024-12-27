@@ -14,11 +14,11 @@ require (
 	github.com/onsi/gomega v1.7.1 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/rifflock/lfshook v0.0.0-20180920164130-b9218ef580f5
+	github.com/shirou/gopsutil/v4 v4.24.11
 	github.com/sirupsen/logrus v1.7.0
-	github.com/stretchr/testify v1.4.0 // indirect
 	github.com/tebeka/strftime v0.1.5 // indirect
 	github.com/tidwall/gjson v1.14.3
 	github.com/xxtea/xxtea-go v0.0.0-20170828040851-35c4b17eecf6
-	golang.org/x/sys v0.0.0-20191120155948-bd437916bb0e
+	golang.org/x/sys v0.26.0
 	gopkg.in/yaml.v2 v2.4.0
 )
