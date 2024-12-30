@@ -178,42 +178,42 @@ func CPrint(level uint32, msg string, formats ...LogFormat) {
 		switch level {
 		case PANIC:
 			{
-				logrus.Panicf(fmt.Sprintf("%v\t%v", msg, str))
+				logrus.Panicf(fmt.Sprintf("%v   %v", msg, str))
 				break
 			}
 		case FATAL:
 			{
-				logrus.Fatalf(fmt.Sprintf("%v\t%v", msg, str))
+				logrus.Fatalf(fmt.Sprintf("%v    %v", msg, str))
 				break
 			}
 		case ERROR:
 			{
-				logrus.Errorf(fmt.Sprintf("%v\t%v", msg, str))
+				logrus.Errorf(fmt.Sprintf("%v    %v", msg, str))
 				break
 			}
 		case WARN:
 			{
-				logrus.Warnf(fmt.Sprintf("%v\t%v", msg, str))
+				logrus.Warnf(fmt.Sprintf("%v    %v", msg, str))
 				break
 			}
 		case INFO:
 			{
-				logrus.Infof(fmt.Sprintf("%v\t%v", msg, str))
+				logrus.Infof(fmt.Sprintf("%v    %v", msg, str))
 				break
 			}
 		case DEBUG:
 			{
-				logrus.Debugf(fmt.Sprintf("%v\t%v", msg, str))
+				logrus.Debugf(fmt.Sprintf("%v    %v", msg, str))
 				break
 			}
 		case TRACE:
 			{
-				logrus.Tracef(fmt.Sprintf("%v\t%v", msg, str))
+				logrus.Tracef(fmt.Sprintf("%v    %v", msg, str))
 				break
 			}
 		default:
 			{
-				logrus.Errorf(fmt.Sprintf("%v\t%v", msg, str))
+				logrus.Errorf(fmt.Sprintf("%v    %v", msg, str))
 				return
 			}
 		}
