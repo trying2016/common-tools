@@ -2,7 +2,9 @@ package logging
 
 import (
 	"bytes"
+	"fmt"
 	"os"
+	"path"
 	"runtime"
 	"strconv"
 
@@ -40,6 +42,10 @@ const (
 	MsgFormatSingle uint32 = iota
 	//MsgFormatMulti use show all func call relation
 	MsgFormatMulti
+)
+
+var (
+	logFile *os.File
 )
 
 // LogFormat is to log format
@@ -133,6 +139,21 @@ func Init(path, filename string, level string, age uint32, disableCPrint bool) {
 	}).Info("Logger Configuration.")
 }
 
+// InitV2 loggers
+func InitV2(dir, filename string, level string, age uint32, disableCPrint bool) {
+	file, err := os.OpenFile(path.Join(dir, filename), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		panic(err)
+	}
+	logFile = file
+
+	// Set logrus to write to the file
+	logrus.SetOutput(file)
+
+	// Set log level
+	logrus.SetLevel(convertLevel(level))
+}
+
 // GetGID return gid
 func GetGID() uint64 {
 	b := make([]byte, 64)
@@ -145,6 +166,57 @@ func GetGID() uint64 {
 
 // CPrint into stdout + log
 func CPrint(level uint32, msg string, formats ...LogFormat) {
+	if logFile != nil {
+		data := mergeLogFormats(formats...)
+		var str string
+		for k, v := range data {
+			str += fmt.Sprintf("%s=%v ", k, v)
+		}
+
+		switch level {
+		case PANIC:
+			{
+				logrus.Panicf(fmt.Sprintf("%v\t%v", msg, str))
+				break
+			}
+		case FATAL:
+			{
+				logrus.Fatalf(fmt.Sprintf("%v\t%v", msg, str))
+				break
+			}
+		case ERROR:
+			{
+				logrus.Errorf(fmt.Sprintf("%v\t%v", msg, str))
+				break
+			}
+		case WARN:
+			{
+				logrus.Warnf(fmt.Sprintf("%v\t%v", msg, str))
+				break
+			}
+		case INFO:
+			{
+				logrus.Infof(fmt.Sprintf("%v\t%v", msg, str))
+				break
+			}
+		case DEBUG:
+			{
+				logrus.Debugf(fmt.Sprintf("%v\t%v", msg, str))
+				break
+			}
+		case TRACE:
+			{
+				logrus.Tracef(fmt.Sprintf("%v\t%v", msg, str))
+				break
+			}
+		default:
+			{
+				logrus.Errorf(fmt.Sprintf("%v\t%v", msg, str))
+				return
+			}
+		}
+		return
+	}
 	if clog == nil {
 		Init("", "miner.log", "info", 0, false)
 	}
