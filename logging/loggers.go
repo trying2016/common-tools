@@ -3,6 +3,7 @@ package logging
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"os"
 	"path"
 	"runtime"
@@ -146,9 +147,10 @@ func InitV2(dir, filename string, level string, age uint32, disableCPrint bool) 
 		panic(err)
 	}
 	logFile = file
-
+	// Set logrus to write to both the file and the console
+	multiWriter := io.MultiWriter(file, os.Stdout)
+	logrus.SetOutput(multiWriter)
 	// Set logrus to write to the file
-	logrus.SetOutput(file)
 
 	// Set log level
 	logrus.SetLevel(convertLevel(level))
