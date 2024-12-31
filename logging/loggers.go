@@ -2,7 +2,6 @@ package logging
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"os"
 	"path"
@@ -154,6 +153,12 @@ func InitV2(dir, filename string, level string, age uint32, disableCPrint bool) 
 
 	// Set log level
 	logrus.SetLevel(convertLevel(level))
+
+	logrus.SetFormatter(&logrus.TextFormatter{
+		ForceColors:     true,
+		FullTimestamp:   true,
+		TimestampFormat: "2006-01-02 15:04:05",
+	})
 }
 
 // GetGID return gid
@@ -170,55 +175,51 @@ func GetGID() uint64 {
 func CPrint(level uint32, msg string, formats ...LogFormat) {
 	if logFile != nil {
 		data := mergeLogFormats(formats...)
-		var str string
-		for k, v := range data {
-			str += fmt.Sprintf("%s=%v ", k, v)
-		}
-
 		switch level {
 		case PANIC:
 			{
-				logrus.Panicf(fmt.Sprintf("%v   %v", msg, str))
+				logrus.WithFields(data).Panic(msg)
 				break
 			}
 		case FATAL:
 			{
-				logrus.Fatalf(fmt.Sprintf("%v    %v", msg, str))
+				logrus.WithFields(data).Fatal(msg)
 				break
 			}
 		case ERROR:
 			{
-				logrus.Errorf(fmt.Sprintf("%v    %v", msg, str))
+				logrus.WithFields(data).Error(msg)
 				break
 			}
 		case WARN:
 			{
-				logrus.Warnf(fmt.Sprintf("%v    %v", msg, str))
+				logrus.WithFields(data).Warn(msg)
 				break
 			}
 		case INFO:
 			{
-				logrus.Infof(fmt.Sprintf("%v    %v", msg, str))
+				logrus.WithFields(data).Info(msg)
 				break
 			}
 		case DEBUG:
 			{
-				logrus.Debugf(fmt.Sprintf("%v    %v", msg, str))
+				logrus.WithFields(data).Debug(msg)
 				break
 			}
 		case TRACE:
 			{
-				logrus.Tracef(fmt.Sprintf("%v    %v", msg, str))
+				logrus.WithFields(data).Trace(msg)
 				break
 			}
 		default:
 			{
-				logrus.Errorf(fmt.Sprintf("%v    %v", msg, str))
+				logrus.WithFields(data).Error(msg)
 				return
 			}
 		}
 		return
 	}
+
 	if clog == nil {
 		Init("", "miner.log", "info", 0, false)
 	}
