@@ -67,6 +67,20 @@ func (hClient *HttpClient) AddQuery(key string, value interface{}) {
 	hClient.queryMap[key] = value
 }
 
+func (hClient *HttpClient) Header() map[string]string {
+	return hClient.headers
+}
+
+// Query get query
+func (hClient *HttpClient) Query() map[string]interface{} {
+	return hClient.queryMap
+}
+
+// PostData get post data
+func (hClient *HttpClient) PostData() map[string]interface{} {
+	return hClient.postData
+}
+
 func (hClient *HttpClient) SetRedirect(redirect bool) {
 	hClient.notRedirect = redirect
 }
