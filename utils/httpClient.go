@@ -265,7 +265,7 @@ func (hClient *HttpClient) setHeaders(request *http.Request) {
 }
 
 func (hClient *HttpClient) do(method string, link string, data []byte) ([]byte, error) {
-	queryParams := hClient.getQuery()
+	queryParams := hClient.GetQuery()
 	if queryParams != "" {
 		if !strings.Contains(link, "?") {
 			link += "?" + queryParams
