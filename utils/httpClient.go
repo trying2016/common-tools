@@ -89,7 +89,7 @@ func (hClient *HttpClient) SetSkipTLSVerification(skipTLSVerification bool) {
 	hClient.skipTLSVerification = skipTLSVerification
 }
 
-func (hClient *HttpClient) getQuery() string {
+func (hClient *HttpClient) GetQuery() string {
 	if hClient.queryMap == nil {
 		return ""
 	}
